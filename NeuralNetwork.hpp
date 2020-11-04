@@ -6,7 +6,6 @@
 #include "RowVector.hpp"
 
 // use typedefs for future ease for changing data types like : float to double 
-typedef float Scalar; 
 typedef Matrix Matrix; 
 typedef RowVector RowVector; 
 typedef ColVector ColVector; 
@@ -15,7 +14,7 @@ typedef ColVector ColVector;
 class NeuralNetwork { 
 public: 
 	// constructor 
-	NeuralNetwork(std::vector<uint> topology, Scalar learningRate = Scalar(0.005)); 
+	NeuralNetwork(vector<uint> topology, float learningRate = float(0.005)); 
 
 	// function for forward propagation of data 
 	void propagateForward(RowVector& input); 
@@ -43,5 +42,6 @@ public:
 	std::vector<RowVector*> cacheLayers; // stores the unactivated (activation fn not yet applied) values of layers 
 	std::vector<RowVector*> deltas; // stores the error contribution of each neurons 
 	std::vector<Matrix*> weights; // the connection weights itself 
-	Scalar learningRate; 
+	std::vector<uint> topology;
+	float learningRate; 
 }; 

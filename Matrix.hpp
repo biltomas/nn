@@ -1,15 +1,19 @@
 // NeuralNetwork.hpp 
 #include <iostream> 
 #include <vector> 
+using namespace std; 
+
 
 // use typedefs for future ease for changing data types like : float to double 
-typedef float Scalar; 
 
 // neural network implementation class! 
 class Matrix { 
 public: 
 	// constructor 
-	Matrix(std::vector<std::vector<Scalar>>); 
+	Matrix(vector<vector<float>>); 
+    Matrix(uint x, uint y);
 
-	std::vector<std::vector<Scalar>> matrix; // stores the different layers of out network 
+    int setRandom();
+
+	vector<vector<float>> matrix; // stores the different layers of out network 
 }; 

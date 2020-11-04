@@ -1,3 +1,4 @@
 
 *.plist
 main
+.vscode/settings.json
