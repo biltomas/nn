@@ -1,6 +1,7 @@
 // NeuralNetwork.hpp 
 #include <iostream> 
 #include <vector> 
+#include "matrix/matrix.hpp"
 using namespace std; 
 
 
@@ -10,10 +11,10 @@ using namespace std;
 class Matrix { 
 public: 
 	// constructor 
-	Matrix(vector<vector<float>>); 
+	Matrix(vector<vector<float>> data); 
     Matrix(uint x, uint y);
 
     int setRandom();
 
-	vector<vector<float>> matrix; // stores the different layers of out network 
+	matrix data; // stores the different layers of out network 
 }; 
