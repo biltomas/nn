@@ -15,7 +15,7 @@ private:
 
 public:
 	matrix() {
-		
+
 	}
 	matrix(std::size_t rows, std::size_t cols)
 	    : matrix_(rows * cols)
@@ -39,6 +39,7 @@ public:
 
 	// Returns number of columns
 	std::size_t cols() const { return cols_; }
+	std::vector<value_type> to_vector() const { return matrix_; }
 
 	/******* TODO - Operators *******/
 	// operator[] takes a pair { row index, column index } where
@@ -73,5 +74,6 @@ matrix operator-(matrix m1, const matrix& m2);
 matrix operator*(matrix m1, const int k);
 
 matrix operator*(const int k, matrix m1);
+matrix operator*(matrix m1, const matrix& m2);
 
 #endif

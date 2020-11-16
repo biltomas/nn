@@ -82,7 +82,7 @@ matrix operator*(const int k, matrix m1) {
 	return m1;
 }
 
-matrix operator*(matrix m1, matrix m2) {
+matrix operator*(matrix m1, const matrix& m2) {
 	matrix result = matrix(m1.size().first, m2.size().second);
 	std::pair <uint,uint> coordinates_target;
 	std::pair <uint,uint> coordinates_m1;

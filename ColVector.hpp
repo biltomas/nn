@@ -1,6 +1,8 @@
 // NeuralNetwork.hpp 
 #include <iostream> 
 #include <vector> 
+#include "matrix/matrix.hpp"
+
 using namespace std; 
 
 // use typedefs for future ease for changing data types like : float to double 
@@ -9,7 +11,10 @@ using namespace std;
 class ColVector { 
 public: 
 	// constructor 
-	ColVector(vector<float>); 
+	ColVector(vector<float> vector);
+    ColVector(uint size);
+	void setValue(uint pos, float value);
+    float coeffRef(uint pos);
     
-	vector<float> vector; // stores the different layers of out network 
+	matrix vector; // stores the different layers of out network 
 }; 

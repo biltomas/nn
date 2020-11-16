@@ -31,8 +31,8 @@ NeuralNetwork::NeuralNetwork(vector<uint> topology, float learningRate)
 		// coeffRef gives the reference of value at that place 
 		// (using this as we are using pointers here) 
 		if (i != topology.size() - 1) { 
-			neuronLayers.back()->vector[topology[i]] = 1.0; 
-			cacheLayers.back()->vector[topology[i]] = 1.0; 
+			neuronLayers.back()->setValue(topology[i], 1.0); 
+			cacheLayers.back()->setValue(topology[i], 1.0); 
 		} 
 
 		// initialze weights matrix 
@@ -59,24 +59,21 @@ void NeuralNetwork::propagateForward(RowVector& input)
     // set the input to input layer 
     // block returns a part of the given vector or matrix 
     // block takes 4 arguments : startRow, startCol, blockRows, blockCols 
-    *neuronLayers.front() = input; 
+	for (uint i = 0; i < input.vector.size().second; i++) {
+		neuronLayers.front()->setValue(i, input.coeffRef(i));
+	};
   
     // propagate the data forawrd 
-    for (uint layerIdx = 1; layerIdx < topology.size(); layerIdx++) { 
-        // already explained above
-		for (uint currPerc = 0; currPerc < neuronLayers[layerIdx]->vector.size(); currPerc++){
-			neuronLayers[layerIdx][currPerc] = 0;
-			for (uint prevPerc = 0; prevPerc < neuronLayers[layerIdx - 1]->vector.size(); prevPerc++){
-				float weight = weights[layerIdx-1][currPerc];
-				neuronLayers[layerIdx][currPerc] += neuronLayers[layerIdx - 1][prevPerc] * weights[layerIdx - 1][currPerc];
-			}
-			(neuronLayers[layerIdx][currPerc]) = (*neuronLayers[layerIdx - 1]) * (*weights[layerIdx - 1]); 
-		}
-    } 
+    for (uint i = 1; i < topology.size(); i++) { 
+        // already explained above 
+        (*neuronLayers[i]) = (*neuronLayers[i - 1]) * (*weights[i - 1]); 
+    } ;
   
     // apply the activation function to your network 
     // unaryExpr applies the given function to all elements of CURRENT_LAYER 
     for (uint i = 1; i < topology.size() - 1; i++) { 
-        neuronLayers[i]->block(0, 0, 1, topology[i]).unaryExpr(std::ptr_fun(activationFunction)); 
+		for (uint ii = 0; ii < topology[i]; ii++){
+			neuronLayers[i]->setValue(ii, activationFunction(neuronLayers[i]->coeffRef(ii)));
+		}
     } 
-}
+} 
