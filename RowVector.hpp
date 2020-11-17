@@ -14,7 +14,9 @@ public:
     RowVector(uint size);
 	void setValue(uint pos, float value);
     float coeffRef(uint pos);
+	float dot(RowVector vector2);
 
 	matrix vector;
 };
 RowVector operator*(RowVector m1, const Matrix& m2);
+RowVector operator-(RowVector m1, const RowVector& m2);

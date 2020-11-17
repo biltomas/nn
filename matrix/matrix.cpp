@@ -111,3 +111,14 @@ matrix::value_type& matrix::operator[](std::pair<size_t, size_t> index){
 const matrix::value_type& matrix::operator[](std::pair<size_t, size_t> index) const {
 	return matrix_[index.first * cols() + index.second];
 }
+
+matrix matrix::transpose() {
+	matrix newMatrix = matrix(cols_, rows_);
+	for (int col = 0; col < cols_; col++) {
+		for (int row = 0; row < rows_; row++) {
+			newMatrix[make_pair(row, col)] = matrix_[col, row];
+		}
+	}
+	return newMatrix;
+	
+};

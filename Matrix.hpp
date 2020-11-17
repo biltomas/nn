@@ -11,10 +11,14 @@ using namespace std;
 class Matrix { 
 public: 
 	// constructor 
-	Matrix(vector<vector<float>> data); 
+	Matrix(vector<vector<float> > data); 
     Matrix(uint x, uint y);
+	Matrix(std::vector<float> data, uint rows);
+	float coeffRef(uint pos1, uint pos2);
+	void setValue(uint pos1, uint pos2, float value);
 
     int setRandom();
 
 	matrix data; // stores the different layers of out network 
+	Matrix transpose();
 }; 

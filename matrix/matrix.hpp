@@ -57,6 +57,7 @@ public:
 	matrix& operator-=(const matrix& m2);
 
 	matrix& operator*=(int k);
+	matrix transpose();
 
 	value_type& operator[](std::pair<size_t, size_t> index);
 	

@@ -2,13 +2,12 @@
 #include <iostream> 
 #include <vector> 
 #include "Matrix.hpp"
-#include "ColVector.hpp"
 #include "RowVector.hpp"
 
 // use typedefs for future ease for changing data types like : float to double 
-typedef Matrix Matrix; 
-typedef RowVector RowVector; 
-typedef ColVector ColVector; 
+// typedef Matrix Matrix; 
+// typedef RowVector RowVector; 
+// typedef ColVector ColVector; 
 
 // neural network implementation class! 
 class NeuralNetwork { 
@@ -29,7 +28,7 @@ public:
 	void updateWeights(); 
 
 	// function to train the neural network give an array of data points 
-	void train(std::vector<RowVector*> data); 
+	void train(std::vector<RowVector*> data, std::vector<RowVector*> output_data); 
 
 	// storage objects for working of neural network 
 	/* 

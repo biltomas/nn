@@ -1,12 +1,25 @@
 #include "NeuralNetwork.hpp"
 #include <iostream> 
 #include <vector> 
-#include "Matrix.hpp"
-#include "matrix/matrix.cpp"
-#include "ColVector.hpp"
+// #include "Matrix.cpp"
+// #include "matrix/matrix.hpp"
+// #include "ColVector.hpp"
 // #include "RowVector.hpp"
-#include "RowVector.cpp"
+// #include "RowVector.cpp"
+#include <math.h>
+#include <cmath>
+
 using namespace std; 
+
+float activationFunction(float x) 
+{ 
+    return tanhf(x); 
+} 
+  
+float activationFunctionDerivative(float x) 
+{ 
+    return 1 - tanhf(x) * tanhf(x); 
+} 
 
 
 // constructor of neural network class 
@@ -38,7 +51,7 @@ NeuralNetwork::NeuralNetwork(vector<uint> topology, float learningRate)
 		// initialze weights matrix 
 		if (i > 0) { 
 			if (i != topology.size() - 1) { 
-				std::pair size = weights.back()->data.size();
+				std::pair<std::size_t, std::size_t> size = weights.back()->data.size();
 				std::vector<float> vector(size.first * size.second, 0.0f);
 				for (int x = 0; x< size.first; x++) {
 					vector[x + size.second - 1] = 1.0f;
@@ -77,3 +90,60 @@ void NeuralNetwork::propagateForward(RowVector& input)
 		}
     } 
 } 
+
+void NeuralNetwork::calcErrors(RowVector& output) 
+{ 
+    // calculate the errors made by neurons of last layer 
+    (*deltas.back()) = output - (*neuronLayers.back()); 
+  
+    // error calculation of hidden layers is different 
+    // we will begin by the last hidden layer 
+    // and we will continue till the first hidden layer 
+    for (uint i = topology.size() - 2; i > 0; i--) { 
+        (*deltas[i]) = (*deltas[i + 1]) * (weights[i]->transpose()); 
+    } 
+} 
+
+void NeuralNetwork::updateWeights() 
+{ 
+    // topology.size()-1 = weights.size() 
+    for (uint i = 0; i < topology.size() - 1; i++) { 
+        // in this loop we are iterating over the different layers (from first hidden to output layer) 
+        // if this layer is the output layer, there is no bias neuron there, number of neurons specified = number of cols 
+        // if this layer not the output layer, there is a bias neuron and number of neurons specified = number of cols -1 
+        if (i != topology.size() - 2) { 
+            for (uint c = 0; c < weights[i]->data.cols() - 1; c++) { 
+                for (uint r = 0; r < weights[i]->data.rows(); r++) { 
+					float num = weights[i]->coeffRef(r, c) + learningRate * deltas[i + 1]->coeffRef(c) * activationFunctionDerivative(cacheLayers[i + 1]->coeffRef(c)) * neuronLayers[i]->coeffRef(r);
+                    weights[i]->setValue(r, c, num); 
+                } 
+            } 
+        } 
+        else { 
+            for (uint c = 0; c < weights[i]->data.cols(); c++) { 
+                for (uint r = 0; r < weights[i]->data.rows(); r++) { 
+					float num = weights[i]->coeffRef(r, c) + learningRate * deltas[i + 1]->coeffRef(c) * activationFunctionDerivative(cacheLayers[i + 1]->coeffRef(c)) * neuronLayers[i]->coeffRef(r);
+                    weights[i]->setValue(r, c, num);
+                } 
+            } 
+        } 
+    } 
+} 
+
+void NeuralNetwork::propagateBackward(RowVector& output) 
+{ 
+    calcErrors(output); 
+    updateWeights(); 
+} 
+
+void NeuralNetwork::train(std::vector<RowVector*> input_data, std::vector<RowVector*> output_data) 
+{ 
+    for (uint i = 0; i < input_data.size(); i++) { 
+        // std::cout << "Input to neural network is : " << *input_data[i] << std::endl; 
+        propagateForward(*input_data[i]); 
+        // std::cout << "Expected output is : " << *output_data[i] << std::endl; 
+        // std::cout << "Output produced is : " << *neuronLayers.back() << std::endl; 
+        propagateBackward(*output_data[i]); 
+        std::cout << "MSE : " << std::sqrt((*deltas.back()).dot((*deltas.back())) / deltas.back()->vector.size().second) << std::endl; 
+    } 
+}

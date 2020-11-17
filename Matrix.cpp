@@ -14,6 +14,11 @@ Matrix::Matrix(std::vector<vector<float>> data)
 	this->data = matrix(data.size(), data[0].size());
 };
 
+Matrix::Matrix(std::vector<float> data, uint rows) 
+{
+	this->data = matrix(data, rows);
+};
+
 Matrix::Matrix(uint x, uint y) 
 {
     std::vector<float> vector(x*y, 0.0f);
@@ -28,4 +33,17 @@ int Matrix::setRandom() {
     std::generate(v.begin(), v.end(), std::rand);
     data = matrix(v, size.first);
     
+};
+
+Matrix Matrix::transpose() {
+    return Matrix(data.transpose().to_vector(), data.size().second);
+};
+
+float Matrix::coeffRef(uint pos1, uint pos2) 
+{
+	return(data[make_pair(pos1, pos2)]);
+};
+
+void Matrix::setValue(uint pos1, uint pos2, float value) {
+	data[make_pair(pos1, pos2)] = value;
 };
