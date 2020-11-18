@@ -27,7 +27,7 @@ Matrix::Matrix(uint x, uint y)
 };
 
 int Matrix::setRandom() {
-    std::pair size = data.size();
+    std::pair<size_t, size_t> size = data.size();
 
     vector<float> v(size.first * size.second);
     std::generate(v.begin(), v.end(), std::rand);

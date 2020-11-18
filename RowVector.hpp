@@ -2,6 +2,7 @@
 #include <iostream> 
 #include <vector> 
 #include "matrix/matrix.hpp"
+#include "Matrix.hpp"
 using namespace std; 
 
 // use typedefs for future ease for changing data types like : float to double 
