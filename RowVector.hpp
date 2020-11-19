@@ -1,4 +1,4 @@
-// NeuralNetwork.hpp 
+#pragma once
 #include <iostream> 
 #include <vector> 
 #include "matrix/matrix.hpp"

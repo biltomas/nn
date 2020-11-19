@@ -116,7 +116,7 @@ matrix matrix::transpose() {
 	matrix newMatrix = matrix(cols_, rows_);
 	for (int col = 0; col < cols_; col++) {
 		for (int row = 0; row < rows_; row++) {
-			newMatrix[make_pair(row, col)] = matrix_[col, row];
+			newMatrix[make_pair(row, col)] = matrix_[col*cols_+ row];
 		}
 	}
 	return newMatrix;

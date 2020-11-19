@@ -1,13 +1,11 @@
-// NeuralNetwork.hpp 
+#pragma once
 #include <iostream> 
 #include <vector> 
 #include "matrix/matrix.hpp"
 using namespace std; 
 
 
-// use typedefs for future ease for changing data types like : float to double 
-
-// neural network implementation class! 
+// matrix implementation class! 
 class Matrix { 
 public: 
 	// constructor 
@@ -19,6 +17,6 @@ public:
 
     int setRandom();
 
-	matrix data; // stores the different layers of out network 
+	matrix data; // stores matrix data
 	Matrix transpose();
 }; 

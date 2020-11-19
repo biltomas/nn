@@ -1,3 +1,4 @@
+#pragma once
 // NeuralNetwork.hpp 
 #include <iostream> 
 #include <vector> 
