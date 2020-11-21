@@ -26,11 +26,15 @@ Matrix::Matrix(uint x, uint y)
 	this->data = matrix(vector, x);
 };
 
-int Matrix::setRandom() {
+void Matrix::setRandom() {
     std::pair<size_t, size_t> size = data.size();
 
     vector<float> v(size.first * size.second);
-    std::generate(v.begin(), v.end(), std::rand);
+    // std::generate(v.begin(), v.end(), (float) std::rand/RAND_MAX);
+    for (int i = 0; i < v.size(); i++) {
+        v[i] = (float) std::rand()/RAND_MAX;
+        // cout << v[i] << " ";
+    }
     data = matrix(v, size.first);
     
 };

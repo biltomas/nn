@@ -83,21 +83,48 @@ matrix operator*(const int k, matrix m1) {
 }
 
 matrix operator*(matrix m1, const matrix& m2) {
-	matrix result = matrix(m1.size().first, m2.size().second);
+	matrix result = matrix(m1.rows(), m2.cols());
 	std::pair <uint,uint> coordinates_target;
 	std::pair <uint,uint> coordinates_m1;
 	std::pair <uint,uint> coordinates_m2;
-	for (uint x = 0; x < m1.size().first; x++) {
-		for (uint y = 0; y < m2.size().second; y++) {
-			coordinates_target = std::make_pair(x,y); 
+	// cout << "multiply" << endl;
+	// cout << "m1:" << endl;
+	// for (uint row = 0; row < m1.rows(); row++) {
+	// 	for (uint col = 0; col < m1.cols(); col++) {
+	// 		cout << m1[make_pair(row, col)] << " ";
+	// 	}
+	// 	cout << endl;
+	// }
+	// cout << "m2:" << endl;
+	// for (uint row = 0; row < m2.rows(); row++) {
+	// 	for (uint col = 0; col < m2.cols(); col++) {
+	// 		cout << m2[make_pair(row, col)] << " ";
+	// 	}
+	// 	cout << endl;
+	// }
+	// cout << "m1 size: " << m1.size().first << ", " << m1.size().second << endl;
+	// cout << "m2 size: " << m2.size().first << ", " << m2.size().second << endl;
+	for (uint x = 0; x < m2.cols(); x++) {
+		for (uint y = 0; y < m1.rows(); y++) {
+			coordinates_target = std::make_pair(y,x); 
 			result[coordinates_target] = 0;
-			for (uint xx = 0; xx < m1.size().first; xx++){
-				coordinates_m1 = std::make_pair((x + xx)%m1.size().first,y); 
-				coordinates_m2 = std::make_pair(x,(y + xx)%m1.size().first); 
+			// cout << y << ", " << x << endl;
+			for (uint xx = 0; xx < m1.cols(); xx++){
+				coordinates_m1 = std::make_pair(y, xx); 
+				coordinates_m2 = std::make_pair(xx, x); 
+				// cout << "m1: " << coordinates_m1.first << ", " << coordinates_m1.second << endl;
+				// cout << "m2: " << coordinates_m2.first << ", " << coordinates_m2.second << endl;
 				result[coordinates_target] += m1[coordinates_m1] * m2[coordinates_m2];
 			}
 		}
 	}
+	// cout << "result:" << endl;
+	// for (uint row = 0; row < result.rows(); row++) {
+	// 	for (uint col = 0; col < result.cols(); col++) {
+	// 		cout << result[make_pair(row, col)] << " ";
+	// 	}
+	// 	cout << endl;
+	// }
 	return result;
 }
 
@@ -113,7 +140,7 @@ const matrix::value_type& matrix::operator[](std::pair<size_t, size_t> index) co
 }
 
 matrix matrix::transpose() {
-	matrix newMatrix = matrix(cols_, rows_);
+	matrix newMatrix = matrix(rows_, cols_);
 	for (int col = 0; col < cols_; col++) {
 		for (int row = 0; row < rows_; row++) {
 			newMatrix[make_pair(row, col)] = matrix_[col*cols_+ row];

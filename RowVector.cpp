@@ -24,6 +24,7 @@ float RowVector::coeffRef(uint pos)
 };
 
 void RowVector::setValue(uint pos, float value) {
+	// cout << vector.size().first << ", " << vector.size().second << endl;
 	vector[make_pair(0, pos)] = value;
 };
 float RowVector::dot(RowVector vector2) {
@@ -31,6 +32,7 @@ float RowVector::dot(RowVector vector2) {
 	for (int i = 0; i < vector.size().second; i++) {
 		result += coeffRef(i) * vector2.coeffRef(i);
 	}
+	return result;
 };
 
 RowVector operator*(RowVector m1, const Matrix& m2) {

@@ -15,7 +15,7 @@ public:
 	float coeffRef(uint pos1, uint pos2);
 	void setValue(uint pos1, uint pos2, float value);
 
-    int setRandom();
+    void setRandom();
 
 	matrix data; // stores matrix data
 	Matrix transpose();
