@@ -2,20 +2,28 @@
 // NeuralNetwork.hpp 
 #include <iostream> 
 #include <vector> 
-#include "matrix/matrix.hpp"
+#include "Matrix.hpp"
 
-using namespace std; 
-
-// use typedefs for future ease for changing data types like : float to double 
 
 // neural network implementation class! 
+template <typename T>
 class ColVector { 
+    std::vector<T>& _vector; // stores the different layers of out network 
 public: 
 	// constructor 
-	ColVector(vector<float> vector);
-    ColVector(uint size);
-	void setValue(uint pos, float value);
-    float coeffRef(uint pos);
+    // use typedefs for future ease for changing data types like : float to double 
+
+    ColVector(const std::vector<float> vector) : _vector(vector, vector.size()) {}
+
+    ColVector(uint size) : _vector(std::vector(size, T()), size) {}
+
+    float coeffRef(const uint pos) const 
+    {
+	    return _vector[pos];
+    }
+
+    void setValue(const uint pos, const T value) {
+        _vector[pos] = value;
+    }
     
-	matrix vector; // stores the different layers of out network 
 }; 

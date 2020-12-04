@@ -14,4 +14,4 @@ endif()
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS on)
 
-add_executable(pv021_nn main.cpp ColVector.cpp Matrix.cpp NeuralNetwork.cpp RowVector.cpp)
+add_executable(pv021_nn main.cpp NeuralNetwork.cpp)

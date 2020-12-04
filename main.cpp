@@ -1,6 +1,6 @@
 #include "NeuralNetwork.hpp"
 
-typedef std::vector<RowVector*> data;
+typedef std::vector<RowVector<float>*> data;
 
 // void genData() 
 // { 
@@ -24,8 +24,8 @@ typedef std::vector<RowVector*> data;
 
 int main() 
 { 
-    std::vector<RowVector*> out_dat;
-    std::vector<RowVector*> in_dat;
+    std::vector<RowVector<float>*> out_dat;
+    std::vector<RowVector<float>*> in_dat;
     for (uint r = 0; r < 1000; r++) { 
         float x = rand() / float(RAND_MAX); 
         float y = rand() / float(RAND_MAX); 
@@ -35,12 +35,13 @@ int main()
         out.push_back(z);
         in.push_back(x);
         in.push_back(y);
-        RowVector* out_row = new RowVector(out);
-        RowVector* in_row = new RowVector(in);
+        RowVector<float>* out_row = new RowVector<float>(out);
+        RowVector<float>* in_row = new RowVector<float>(in);
         out_dat.push_back(out_row);
         // cout << out_dat.size() << endl;
-        
+            
         in_dat.push_back(in_row);
+
     }
     NeuralNetwork n({ 2, 3, 1 }); 
     // std::vector<RowVector*> out_dat; 

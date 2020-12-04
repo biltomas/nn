@@ -12,6 +12,7 @@
 !*.TXT
 !*.cpp
 !*.hpp
+!*.tpp
 
 # Unignore markup
 !*.ad

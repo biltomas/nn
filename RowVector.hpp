@@ -1,23 +1,62 @@
 #pragma once
+#include "Matrix.hpp"
 #include <iostream> 
 #include <vector> 
-#include "matrix/matrix.hpp"
-#include "Matrix.hpp"
+#include <algorithm>
+#include <string>
 using namespace std; 
 
-// use typedefs for future ease for changing data types like : float to double 
-
-// neural network implementation class! 
+template <typename T = float>
 class RowVector { 
+    Matrix<T> vector_;
 public: 
-	// constructor 
-	RowVector(vector<float> vector);
-    RowVector(uint size);
-	void setValue(uint pos, float value);
-    float coeffRef(uint pos);
-	float dot(RowVector vector2);
 
-	matrix vector;
+	RowVector(std::vector<T> vector) : vector_(vector, 1) {}
+
+    RowVector(uint size) {
+        std::vector<T> vector (size, T());
+        vector_ = Matrix(vector, 1);
+    }
+
+	void setValue(const uint pos, const float value) {
+        vector_[{0, pos}] = value;
+    }
+
+    float coeffRef(const uint pos) const {
+        if (pos >= length()) {
+            std::cerr << "Index out of range at "
+            << length()
+            << " with size of "
+            << pos
+            << std::endl;
+            throw std::out_of_range("Aborted");
+        }
+        return vector_[{0, pos}];
+    }
+
+	T dot(const RowVector<T>& vector2) const {
+        T result = 0;
+        for (unsigned i = 0; i < length(); i++) {
+            result += coeffRef(i) * vector2.coeffRef(i);
+        }
+        return result;
+    }
+
+    unsigned length() const { return vector_.size().second; }
+
+    const Matrix<T>& data() const {
+        return vector_;
+    }
 };
-RowVector operator*(RowVector m1, const Matrix& m2);
-RowVector operator-(RowVector m1, const RowVector& m2);
+
+template <typename T>
+RowVector<T> operator*(RowVector<T>& m1, const Matrix<T>& m2) {
+    return RowVector<T>((m1.data() * m2).to_vector());
+}
+
+
+template <typename T>
+RowVector<T> operator-(RowVector<T>& m1, const RowVector<T>& m2) {
+	//return RowVector((m1.vector - m2.vector).to_vector());
+    return RowVector<T>((m1.data() - m2.data()).to_vector());
+}
