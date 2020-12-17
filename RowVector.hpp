@@ -24,12 +24,7 @@ public:
 
     float coeffRef(const uint pos) const {
         if (pos >= length()) {
-            std::cerr << "Index out of range at "
-            << length()
-            << " with size of "
-            << pos
-            << std::endl;
-            throw std::out_of_range("Aborted");
+            throw std::out_of_range("Index out of range");
         }
         return vector_[{0, pos}];
     }

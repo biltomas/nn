@@ -15,3 +15,5 @@ endif()
 set(CMAKE_EXPORT_COMPILE_COMMANDS on)
 
 add_executable(pv021_nn main.cpp NeuralNetwork.cpp)
+
+add_executable(tests tests/test_vectors.cpp tests/catch2.cpp)

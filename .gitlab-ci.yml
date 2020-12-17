@@ -2,6 +2,7 @@ image: amardikian/clang-3.8
 
 stages:
 - build
+- test
 
 build:
     stage: build
@@ -15,3 +16,12 @@ build:
         - make
     artifacts:
         untracked: true
+
+test:
+    stage: test
+    tags:
+        - shared-fi
+    script:
+        - ./tests
+    dependencies:
+        - build
