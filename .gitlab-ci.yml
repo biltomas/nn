@@ -1,4 +1,4 @@
-image: alpine:latest
+image: alpine:clang-3.8
 
 stages:
 - build
@@ -8,10 +8,9 @@ build:
     tags:
         - shared-fi
     variables:
-        CXX: clang
+        CC: clang
+        CXX: clang++
     script:
-        - apk add make cmake clang libc6-compat gcompat
-        - which ld
         - cmake .
         - make
     artifacts:
