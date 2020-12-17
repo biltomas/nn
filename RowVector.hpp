@@ -15,7 +15,7 @@ public:
 
     RowVector(uint size) {
         std::vector<T> vector (size, T());
-        vector_ = Matrix(vector, 1);
+        vector_ = Matrix<T>(vector, 1);
     }
 
 	void setValue(const uint pos, const float value) {
