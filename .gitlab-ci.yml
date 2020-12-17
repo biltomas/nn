@@ -1,0 +1,16 @@
+image: gcc:latest
+
+stages:
+- build
+
+build:
+    stage: build
+    tags:
+        - shared-fi
+    variables:
+        CXX: clang
+    script:
+        - cmake
+        - make
+    artifacts:
+        untracked: true
