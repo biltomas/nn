@@ -1,4 +1,4 @@
-image: alpine:clang-3.8
+image: amardikian/clang-3.8
 
 stages:
 - build
