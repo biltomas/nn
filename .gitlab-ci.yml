@@ -11,7 +11,7 @@ build:
         CXX: clang
     script:
         - apk add make cmake clang
-        - cmake
+        - cmake .
         - make
     artifacts:
         untracked: true
