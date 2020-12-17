@@ -10,7 +10,7 @@ build:
     variables:
         CXX: clang
     script:
-        - apk add make cmake clang libc6-compat
+        - apk add make cmake clang libc6-compat gcompat
         - cmake .
         - make
     artifacts:
