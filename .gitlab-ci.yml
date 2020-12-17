@@ -11,6 +11,7 @@ build:
         CXX: clang
     script:
         - apk add make cmake clang libc6-compat gcompat
+        - which ld
         - cmake .
         - make
     artifacts:
