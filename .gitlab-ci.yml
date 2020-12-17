@@ -22,6 +22,6 @@ test:
     tags:
         - shared-fi
     script:
-        - ./tests
+        - ./pv021_tests
     dependencies:
         - build
