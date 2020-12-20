@@ -94,6 +94,9 @@ Matrix<T> operator*(const T k, Matrix<T> m1) {
 
 template <typename T>
 Matrix<T> operator*(const Matrix<T> m1, const Matrix<T>& m2) {
+    if (m1.cols() != m2.rows()) {
+        throw std::invalid_argument("Invalid matrix size");
+    }
 	Matrix<T> result(m1.rows(), m2.cols());
 	std::pair <uint,uint> coordinates_target;
 	std::pair <uint,uint> coordinates_m1;
