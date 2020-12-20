@@ -17,3 +17,5 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS on)
 add_executable(pv021_nn main.cpp NeuralNetwork.cpp)
 
 add_executable(pv021_tests tests/test_vectors.cpp tests/test_matrix.cpp tests/catch2.cpp)
+
+add_executable(load_data tests/load_data.cpp)
