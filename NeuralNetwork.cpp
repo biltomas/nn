@@ -15,7 +15,7 @@ float activationFunction(float x)
 float activationFunctionDerivative(float x) 
 { 
     return 1 - tanhf(x) * tanhf(x); 
-} 
+}
 
 
 // constructor of neural network class 
@@ -200,4 +200,26 @@ void NeuralNetwork::train(std::vector<RowVector<float>*> input_data, std::vector
         std::cout << "\nMSE : " << std::sqrt((*deltas.back()).dot((*deltas.back())) / deltas.back()->length()) << std::endl; 
     } 
 	// printf("train end\n");
+}
+
+void NeuralNetwork::predict(std::vector<RowVector<float>*> data, string outputFile = "outputFile.csv")
+{
+	ofstream myfile;
+	myfile.open(outputFile);
+	
+	for (uint i = 0; i < data.size(); i++) { 
+        //std::cout << "Input to neural network is : " << input_data[i] << std::endl; 
+        propagateForward(*data[i]); 
+		float max = 0;
+		int result = 0;
+		for (int ii = 0; ii < neuronLayers.back()->length(); ii++) {
+			if (neuronLayers.back()->coeffRef(ii) > max) {
+				max = neuronLayers.back()->coeffRef(ii);
+				result = ii;
+			}
+		};
+		cout << "predicted label is: " << result << endl;
+		myfile << result << "\n";
+    } 
+	myfile.close();
 }
