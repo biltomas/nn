@@ -202,7 +202,7 @@ void NeuralNetwork::train(std::vector<RowVector<float>*> input_data, std::vector
 	// printf("train end\n");
 }
 
-void NeuralNetwork::predict(std::vector<RowVector<float>*> data, string outputFile = "outputFile.csv")
+void NeuralNetwork::predict(std::vector<RowVector<float>*> data, string outputFile)
 {
 	ofstream myfile;
 	myfile.open(outputFile);
@@ -212,7 +212,7 @@ void NeuralNetwork::predict(std::vector<RowVector<float>*> data, string outputFi
         propagateForward(*data[i]); 
 		float max = 0;
 		int result = 0;
-		for (int ii = 0; ii < neuronLayers.back()->length(); ii++) {
+		for (uint ii = 0; ii < neuronLayers.back()->length(); ii++) {
 			if (neuronLayers.back()->coeffRef(ii) > max) {
 				max = neuronLayers.back()->coeffRef(ii);
 				result = ii;
