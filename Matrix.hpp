@@ -69,6 +69,7 @@ public:
 	T& operator[](std::pair<size_t, size_t> index);
 	
 	const T& operator[](std::pair<size_t, size_t> index) const;
+
 };
 
 template <typename T>

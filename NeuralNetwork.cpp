@@ -194,7 +194,7 @@ void NeuralNetwork::train(std::vector<RowVector<float>*> input_data, std::vector
         propagateForward(*input_data[i]); 
         std::cout << "Expected output is : " << output_data[i]->coeffRef(0) << std::endl; 
         std::cout << "Output produced is : ";
-		for(int i=0; i< neuronLayers.back()->length(); ++i)
+		for(unsigned i=0; i< neuronLayers.back()->length(); ++i)
   			std::cout << neuronLayers.back()->coeffRef(i) << ' '; 
         propagateBackward(*output_data[i]); 
         std::cout << "\nMSE : " << std::sqrt((*deltas.back()).dot((*deltas.back())) / deltas.back()->length()) << std::endl; 

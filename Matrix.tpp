@@ -169,13 +169,9 @@ Matrix<T> Matrix<T>::transpose() {
 
 template <typename T>
 void Matrix<T>::setRandom() {
-    std::pair<size_t, size_t> Matrix_size = size();
-
-    std::vector<T> v(Matrix_size.first * Matrix_size.second);
     // std::generate(v.begin(), v.end(), (float) std::rand/RAND_MAX);
-    for (size_t i = 0; i < v.size(); i++) {
-        v[i] = static_cast<T>(std::rand()) / static_cast<T>(RAND_MAX);
+    for (size_t i = 0; i < matrix_.size(); i++) {
+        matrix_[i] = static_cast<T>(std::rand()) / (static_cast<T>(RAND_MAX) / 2) - 1;
         // cout << v[i] << " ";
     }
-    *this = Matrix(v, Matrix_size.first);
 }
