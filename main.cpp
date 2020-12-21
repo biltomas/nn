@@ -23,15 +23,16 @@ typedef std::vector<RowVector<float>*> data;
 //         in_dat.push_back(&in_row);
 //     }  
 // } 
-void oneHotEncode(std::vector<float> out_dat, int num_classes) {
+std::vector<float> oneHotEncode(int out_dat, int num_classes) {
     vector<float> encoded;
     for (int i = 0; i < num_classes; i++) {
-        if (out_dat[i] == i) {
+        if (out_dat == i) {
             encoded.push_back(1);
         } else {
             encoded.push_back(0);
         };
     };
+    return encoded;
 };
 
 int main() 
@@ -43,12 +44,15 @@ int main()
     std::vector<RowVector<float>*> out_dat;
     std::vector<RowVector<float>*> in_dat;
     for (uint r = 0; r < x.size(); r++) { 
-        out_dat.push_back(x[r].label);
-            
+        RowVector<float> label = (oneHotEncode(x[r].label, 10));
+        
+        out_dat.push_back(&label);    
         in_dat.push_back(&x[r].data);
 
     }
-    NeuralNetwork n({ 2, 3, 1 }); 
+    NeuralNetwork n({ 784, 100, 10 }); 
+    std::cout << "Train data: " << in_dat.size() << std::endl;
+    std::cout << "Train data[0] len: " << in_dat[0]->length() << std::endl;
     // std::vector<RowVector*> out_dat; 
     // std::vector<RowVector*> in_dat;
     // cout << out_dat.size() << endl;
@@ -56,7 +60,7 @@ int main()
     // cout << "rows " << out_dat.back()->vector.rows() << endl;
     // cout << "cols "<< out_dat.back()->vector.cols() << endl;
     // cout << "value "<< out_dat.back()->coeffRef(0) << endl;
-    // for (int i = 0; i < 1; i++)
-    //     n.train(in_dat, out_dat); 
+    for (int i = 0; i < 1; i++)
+        n.train(in_dat, out_dat); 
     return 0; 
 } 

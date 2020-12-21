@@ -130,7 +130,7 @@ void NeuralNetwork::propagateForward(RowVector<float>& input)
 
 void NeuralNetwork::calcErrors(RowVector<float>& output) 
 { 
-	// printf("calcErrors start\n");
+	printf("calcErrors start\n");
     // calculate the errors made by neurons of last layer 
 	// cout << "delats size" << deltas.size() << endl;
 	// cout << "output size: " << output.vector.size().second << endl;
@@ -144,12 +144,12 @@ void NeuralNetwork::calcErrors(RowVector<float>& output)
     for (uint i = topology.size() - 2; i > 0; i--) { 
         (*deltas[i]) = (*deltas[i + 1]) * (weights[i]->transpose()); 
     } 
-	// printf("calcErrors end");
+	printf("calcErrors end");
 } 
 
 void NeuralNetwork::updateWeights() 
 { 
-	// printf("updateWeights start\n");
+	printf("updateWeights start\n");
     // topology.size()-1 = weights.size() 
     for (uint i = 0; i < topology.size() - 1; i++) { 
         // in this loop we are iterating over the different layers (from first hidden to output layer) 
@@ -177,7 +177,7 @@ void NeuralNetwork::updateWeights()
             } 
         } 
     } 
-	// printf("updateWeights end\n");
+	printf("updateWeights end\n");
 } 
 
 void NeuralNetwork::propagateBackward(RowVector<float>& output) 
@@ -190,12 +190,12 @@ void NeuralNetwork::train(std::vector<RowVector<float>*> input_data, std::vector
 { 
 	// printf("train start\n");
     for (uint i = 0; i < input_data.size(); i++) { 
-        //std::cout << "Input to neural network is : " << input_data[i] << std::endl; 
+        // std::cout << "Input to neural network is : " << input_data[i] << std::endl; 
         propagateForward(*input_data[i]); 
-        //std::cout << "Expected output is : " << output_data[i]->coeffRef(0) << std::endl; 
-        //std::cout << "Output produced is : ";
-		// for(int i=0; i< neuronLayers.back()->vector.rows(); ++i)
-  		// 	std::cout << neuronLayers.back()->coeffRef(i) << ' '; 
+        std::cout << "Expected output is : " << output_data[i]->coeffRef(0) << std::endl; 
+        std::cout << "Output produced is : ";
+		for(int i=0; i< neuronLayers.back()->length(); ++i)
+  			std::cout << neuronLayers.back()->coeffRef(i) << ' '; 
         propagateBackward(*output_data[i]); 
         std::cout << "\nMSE : " << std::sqrt((*deltas.back()).dot((*deltas.back())) / deltas.back()->length()) << std::endl; 
     } 
