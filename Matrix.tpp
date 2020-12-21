@@ -171,7 +171,7 @@ template <typename T>
 void Matrix<T>::setRandom() {
     // std::generate(v.begin(), v.end(), (float) std::rand/RAND_MAX);
     for (size_t i = 0; i < matrix_.size(); i++) {
-        matrix_[i] = static_cast<T>(std::rand()) / (static_cast<T>(RAND_MAX) / 2) - 1;
+        matrix_[i] = static_cast<T>(std::rand()) / (static_cast<T>(RAND_MAX));
         // cout << v[i] << " ";
     }
 }

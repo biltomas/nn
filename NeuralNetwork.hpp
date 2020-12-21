@@ -34,9 +34,9 @@ public:
 	void updateWeights(); 
 
 	// function to train the neural network give an array of data points 
-	void train(std::vector<RowVector<float>*> data, std::vector<RowVector<float>*> output_data); 
+	void train(std::vector<RowVector<float>*> data, std::vector<RowVector<float>> output_data); 
 
-	void predict(std::vector<RowVector<float>*> data, string outputFile = "outputFile.csv");
+	void predict(std::vector<RowVector<float>*> data, string outputFile = "./outputFile.csv");
 
 	// storage objects for working of neural network 
 	/* 

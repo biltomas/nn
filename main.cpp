@@ -27,9 +27,9 @@ std::vector<float> oneHotEncode(int out_dat, int num_classes) {
     vector<float> encoded;
     for (int i = 0; i < num_classes; i++) {
         if (out_dat == i) {
-            encoded.push_back(1);
+            encoded.push_back(1.0f);
         } else {
-            encoded.push_back(0);
+            encoded.push_back(0.0f);
         };
     };
     return encoded;
@@ -41,12 +41,15 @@ int main()
     auto x = loader.load();
     std::cout << "Number of entries of the dataset: " << x.size() << std::endl;
 
-    std::vector<RowVector<float>*> out_dat;
+    std::vector<RowVector<float>> out_dat;
     std::vector<RowVector<float>*> in_dat;
     for (uint r = 0; r < x.size(); r++) { 
-        RowVector<float> label = (oneHotEncode(x[r].label, 10));
+        RowVector<float> label = RowVector<float>(oneHotEncode(x[r].label, 10));
         
-        out_dat.push_back(&label);    
+        out_dat.push_back(label);   
+        for (int i = 0; i<x[r].data.length();i++) {
+            x[r].data.setValue(i,x[r].data.coeffRef(i)/255);
+        }
         in_dat.push_back(&x[r].data);
 
     }
@@ -62,5 +65,23 @@ int main()
     // cout << "value "<< out_dat.back()->coeffRef(0) << endl;
     for (int i = 0; i < 1; i++)
         n.train(in_dat, out_dat); 
+    
+    DataLoader loader1("../data/fashion_mnist_test_vectors.csv", "../data/fashion_mnist_test_labels.csv");
+    auto y = loader1.load();
+
+    std::vector<RowVector<float>> test_out_dat;
+    std::vector<RowVector<float>*> test_in_dat;
+    for (uint r = 0; r < y.size(); r++) { 
+        RowVector<float> label = RowVector<float>(oneHotEncode(y[r].label, 10));
+        
+        test_out_dat.push_back(label);   
+        for (int i = 0; i<y[r].data.length();i++) {
+            y[r].data.setValue(i,y[r].data.coeffRef(i)/255);
+        }
+        test_in_dat.push_back(&y[r].data);
+
+    }
+    n.predict(test_in_dat);
+
     return 0; 
 } 
