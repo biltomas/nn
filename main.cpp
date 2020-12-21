@@ -23,6 +23,16 @@ typedef std::vector<RowVector<float>*> data;
 //         in_dat.push_back(&in_row);
 //     }  
 // } 
+void oneHotEncode(std::vector<float> out_dat, int num_classes) {
+    vector<float> encoded;
+    for (int i = 0; i < num_classes; i++) {
+        if (out_dat[i] == i) {
+            encoded.push_back(1);
+        } else {
+            encoded.push_back(0);
+        };
+    };
+};
 
 int main() 
 { 
