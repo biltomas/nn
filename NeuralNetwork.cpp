@@ -5,18 +5,44 @@
 // #include "RowVector.hpp"
 // #include "RowVector.cpp"
 
-RowVector<float> softMax (RowVector<float> input) {
+void softMax (const RowVector<float>& input, RowVector<float>& output) {
 	float max = 0;
 	float sum = 0;
 	for (uint i = 0; i < input.length(); i++) {
-		if (input.coeffRef(i) > max) max = input.coeffRef(i);
+		if (input.coeffRef(i) > max) { 
+            max = input.coeffRef(i);
+        }
 		sum += input.coeffRef(i);
 	}
 	for(uint f = 0; f < input.length(); f++)
-  		input.setValue(f, exp(input.coeffRef(f) - max)/sum);
-	return input;
+  		output.setValue(f, exp(input.coeffRef(f) - max)/sum);
 }
 
+/*
+void softMax(const RowVector<float>& source, RowVector<float>& destination) {
+	float max = 0;
+	long double sum = 0;
+	for (uint i = 0; i < source.length(); i++) {
+        std::cout << "Softmax sum: " << sum << std::endl;
+		sum += exp(source.coeffRef(i));
+	}
+	for(uint f = 0; f < destination.length(); f++)
+  		destination.setValue(f, exp(source.coeffRef(f) - max) / sum);
+}
+*/
+
+
+void softMaxDerivative(const RowVector<float>& source, RowVector<float>& destination) {
+    float sum = 0;
+    for (size_t i = 0; i < source.length(); i++) {
+        sum += exp(source.coeffRef(i));
+    }
+    float denominator = sum * sum;
+    for (size_t i = 0; i < destination.length(); i++) {
+        float current = source.coeffRef(i) * (sum - source.coeffRef(i));
+        destination.setValue(i, current / denominator);
+    }
+}
 
 float activationFunction(float x) 
 { 
@@ -115,9 +141,14 @@ void NeuralNetwork::propagateForward(RowVector<float>& input)
 		// cout << "layer: " << i << endl;
 		// cout << "updating cache" << endl;
         (*neuronLayers[i]) = (*neuronLayers[i - 1]) * (*weights[i - 1]);
-		for (uint ii = 0; ii < neuronLayers[i]->length(); ii++) {
-			neuronLayers[i]->setValue(ii, activationFunction(neuronLayers[i]->coeffRef(ii)));
-		}
+        if (i == topology.size() - 1) { //now use the softmax as the activation function
+            softMax(*neuronLayers[i], *neuronLayers[i]);
+
+        } else { // else use the regular tanh
+            for (uint ii = 0; ii < neuronLayers[i]->length(); ii++) {
+			    neuronLayers[i]->setValue(ii, activationFunction(neuronLayers[i]->coeffRef(ii)));
+		    }
+        }
 		// cout << "cache " << i << " size " << cacheLayers[i]->vector.cols() << endl;
 		// cout << "cache " << i << ": ";
 		// for (uint ii = 0; ii < cacheLayers[i]->vector.cols(); ii++){
@@ -144,6 +175,7 @@ void NeuralNetwork::propagateForward(RowVector<float>& input)
 	// printf("propagateForward end\n");
 } 
 
+/* OLD MSE
 void NeuralNetwork::calcErrors(RowVector<float>& output) 
 { 
 	// printf("calcErrors start\n");
@@ -169,6 +201,36 @@ void NeuralNetwork::calcErrors(RowVector<float>& output)
     } 
 	// printf("calcErrors end");
 } 
+*/
+
+// CROSS ENTROPY
+void NeuralNetwork::calcErrors(RowVector<float>& output) 
+{ 
+	// printf("calcErrors start\n");
+    // calculate the errors made by neurons of last layer 
+	// cout << "delats size" << deltas.size() << endl;
+	// cout << "output size: " << output.length() << endl;
+	// cout << "pred size: " << (*neuronLayers.back()).length() << endl;
+	for (size_t i = 0; i < output.length(); i++) {
+		deltas.back()->setValue(i, (-(neuronLayers.back()->coeffRef(i) - output.coeffRef(i))) /
+                                    ((1 - neuronLayers.back()->coeffRef(i)) * neuronLayers.back()->coeffRef(i)) );
+		// cout << output.coeffRef(i) << " - " << neuronLayers.back()->coeffRef(i) << " = " << deltas.back()->coeffRef(i) << endl;
+		// cout << deltas.back()->coeffRef(i) << " ";
+	}
+	// cout << endl;
+    // (*deltas.back()) = output - (*neuronLayers.back()); 
+	// cout << "deltas.back size: " << (*deltas.back()).length() << endl;
+	// printf("first\n");
+  
+    // error calculation of hidden layers is different 
+    // we will begin by the last hidden layer 
+    // and we will continue till the first hidden layer 
+    for (uint i = topology.size() - 2; i > 0; i--) { 
+        (*deltas[i]) = (*deltas[i + 1]) * (weights[i]->transpose()); 
+    } 
+	// printf("calcErrors end");
+}
+
 
 void NeuralNetwork::updateWeights() 
 { 
@@ -191,9 +253,11 @@ void NeuralNetwork::updateWeights()
             } 
         } 
         else { 
+            RowVector<float> softMaxDer(weights[i]->cols());
+            softMaxDerivative(*cacheLayers[i + 1], softMaxDer);
             for (uint c = 0; c < weights[i]->cols(); c++) { 
                 for (uint r = 0; r < weights[i]->rows(); r++) { 
-					float num = weights[i]->operator[]({r, c}) + learningRate * deltas[i + 1]->coeffRef(c) * activationFunctionDerivative(cacheLayers[i + 1]->coeffRef(c)) * neuronLayers[i]->coeffRef(r);
+					float num = weights[i]->operator[]({r, c}) + learningRate * deltas[i + 1]->coeffRef(c) * softMaxDer.coeffRef(c) * neuronLayers[i]->coeffRef(r);
 					// cout << "weight: " << i << " pos: " << r << ", " << c << " prev value " << weights[i]->coeffRef(r, c) << " set to " << num << endl;
                     weights[i]->operator[]({r, c}) = num;
                 } 

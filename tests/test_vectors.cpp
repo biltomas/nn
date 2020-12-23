@@ -1,6 +1,7 @@
 #define CATCH_CONFIG_MAIN
 #include "catch2.hpp"
 #include "../RowVector.hpp"
+#include "../NeuralNetwork.hpp"
 
 #define TEST_ROWVEC_SIZE 10
 
@@ -59,4 +60,17 @@ TEST_CASE("RowVector - operators") {
         }
         REQUIRE_THROWS_AS(row_vec_1 - row_vec_3, std::invalid_argument);
     }
+}
+
+TEST_CASE("Softmax") {
+    std::vector<float> vec1 {149.216766, 141.332367, 144.922256, 150.637802, 143.88446, 145.912979, 149.275513, 152.674698, 145.166977, 147.92778};
+    RowVector<float> row_vec(vec1);
+    RowVector<float> result(10);
+    float soft_sum = 0;
+    for (int i = 0; i < 10; i++) {
+        soft_sum += result.coeffRef(i);
+    }
+    softMax(vec1, result);
+    std::cout << "Softmax: " << result; 
+    std::cout << "Sum: " << soft_sum << std::endl;
 }

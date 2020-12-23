@@ -52,3 +52,6 @@ public:
 	std::vector<size_t> topology;
 	float learningRate; 
 }; 
+
+
+void softMax(const RowVector<float>& source, RowVector<float>& destination);
