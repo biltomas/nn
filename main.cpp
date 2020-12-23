@@ -53,7 +53,7 @@ int main()
         in_dat.push_back(&x[r].data);
 
     }
-    NeuralNetwork n({ 784, 100, 10 }); 
+    NeuralNetwork n({ 784, 300, 10 }); 
     std::cout << "Train data: " << in_dat.size() << std::endl;
     std::cout << "Train data[0] len: " << in_dat[0]->length() << std::endl;
     // std::vector<RowVector*> out_dat; 

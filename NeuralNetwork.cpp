@@ -5,6 +5,17 @@
 // #include "RowVector.hpp"
 // #include "RowVector.cpp"
 
+RowVector<float> softMax (RowVector<float> input) {
+	float max = 0;
+	float sum = 0;
+	for (uint i = 0; i < input.length(); i++) {
+		if (input.coeffRef(i) > max) max = input.coeffRef(i);
+		sum += input.coeffRef(i);
+	}
+	for(uint f = 0; f < input.length(); f++)
+  		input.setValue(f, exp(input.coeffRef(f) - max)/sum);
+	return input;
+}
 
 
 float activationFunction(float x) 
