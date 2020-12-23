@@ -49,6 +49,7 @@ NeuralNetwork::NeuralNetwork(vector<size_t> topology, float learningRate)
 		// initialize cache and delta vectors 
 		cacheLayers.push_back(make_unique<RowVector<float>>(neuronLayers.back()->length())); 
 		deltas.push_back(make_unique<RowVector<float>>(neuronLayers.back()->length())); 
+		deltasCumulative.push_back(make_unique<RowVector<float>>(neuronLayers.back()->length())); 
 		// printf("NeuralNetwork 1\n");
 
 		// vector.back() gives the handle to recently added element 
@@ -167,6 +168,9 @@ void NeuralNetwork::calcErrors(RowVector<float>& output)
     for (uint i = topology.size() - 2; i > 0; i--) { 
         (*deltas[i]) = (*deltas[i + 1]) * (weights[i]->transpose()); 
     } 
+	for (uint i = 0; i<deltas.size(); i++) {
+		(*deltasCumulative[i]) = (*deltasCumulative[i]) + (*deltas[i]); 
+	}
 	// printf("calcErrors end");
 } 
 
@@ -182,7 +186,7 @@ void NeuralNetwork::updateWeights()
             for (unsigned c = 0; c < weights[i]->cols() - 1; c++) { 
                 for (uint r = 0; r < weights[i]->rows(); r++) { 
 					float num = weights[i]->operator[]({r, c}) + learningRate * 
-                        deltas[i + 1]->coeffRef(c) * 
+                        deltasCumulative[i + 1]->coeffRef(c) * 
                         activationFunctionDerivative(cacheLayers[i + 1]->coeffRef(c)) * 
                         neuronLayers[i]->coeffRef(r);
 					// cout << "weight: " << i << " pos: " << r << ", " << c << " prev value " << weights[i]->coeffRef(r, c) << " set to " << num << endl;
@@ -193,7 +197,7 @@ void NeuralNetwork::updateWeights()
         else { 
             for (uint c = 0; c < weights[i]->cols(); c++) { 
                 for (uint r = 0; r < weights[i]->rows(); r++) { 
-					float num = weights[i]->operator[]({r, c}) + learningRate * deltas[i + 1]->coeffRef(c) * activationFunctionDerivative(cacheLayers[i + 1]->coeffRef(c)) * neuronLayers[i]->coeffRef(r);
+					float num = weights[i]->operator[]({r, c}) + learningRate * deltasCumulative[i + 1]->coeffRef(c) * activationFunctionDerivative(cacheLayers[i + 1]->coeffRef(c)) * neuronLayers[i]->coeffRef(r);
 					// cout << "weight: " << i << " pos: " << r << ", " << c << " prev value " << weights[i]->coeffRef(r, c) << " set to " << num << endl;
                     weights[i]->operator[]({r, c}) = num;
                 } 
@@ -209,7 +213,7 @@ void NeuralNetwork::propagateBackward(RowVector<float>& output)
     updateWeights(); 
 } 
 
-void NeuralNetwork::train(std::vector<RowVector<float>*> input_data, std::vector<RowVector<float>> output_data) 
+void NeuralNetwork::train(std::vector<RowVector<float>*> input_data, std::vector<RowVector<float>> output_data, int batch_size) 
 { 
 	// printf("train start\n");
     for (uint i = 0; i < input_data.size(); i++) { 
@@ -220,8 +224,13 @@ void NeuralNetwork::train(std::vector<RowVector<float>*> input_data, std::vector
   		// 	std::cout << output_data[i].coeffRef(ii) << ' '; 
         // std::cout << endl << "Output produced is : ";
 		// for(unsigned i=0; i< neuronLayers.back()->length(); ++i)
-  		// 	std::cout << neuronLayers.back()->coeffRef(i) << ' '; 
-        propagateBackward(output_data[i]); 
+  		// 	std::cout << neuronLayers.back()->coeffRef(i) << ' ';
+		if (i%batch_size == 0) {
+			propagateBackward(output_data[i]);
+		} else {
+			calcErrors(output_data[i]);
+		}
+         
         // std::cout << "\nMSE : " << std::sqrt((*deltas.back()).dot((*deltas.back())) / deltas.back()->length()) << std::endl; 
     } 
 	// printf("train end\n");

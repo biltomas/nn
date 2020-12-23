@@ -57,6 +57,12 @@ RowVector<T> operator-(RowVector<T>& m1, const RowVector<T>& m2) {
 }
 
 template <typename T>
+RowVector<T> operator+(RowVector<T>& m1, const RowVector<T>& m2) {
+	//return RowVector((m1.vector - m2.vector).to_vector());
+    return RowVector<T>((m1.data() + m2.data()).to_vector());
+}
+
+template <typename T>
 std::ostream &operator<<(std::ostream& out, const RowVector<T> &mt) {
     out << mt.data();
     return out;

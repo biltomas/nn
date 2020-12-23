@@ -64,7 +64,7 @@ int main()
     // cout << "cols "<< out_dat.back()->vector.cols() << endl;
     // cout << "value "<< out_dat.back()->coeffRef(0) << endl;
     for (int i = 0; i < 1; i++)
-        n.train(in_dat, out_dat); 
+        n.train(in_dat, out_dat, 30); 
     
     DataLoader loader1("../data/fashion_mnist_test_vectors.csv", "../data/fashion_mnist_test_labels.csv");
     auto y = loader1.load();

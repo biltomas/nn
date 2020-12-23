@@ -34,7 +34,7 @@ public:
 	void updateWeights(); 
 
 	// function to train the neural network give an array of data points 
-	void train(std::vector<RowVector<float>*> data, std::vector<RowVector<float>> output_data); 
+	void train(std::vector<RowVector<float>*> data, std::vector<RowVector<float>> output_data, int batch_size); 
 
 	void predict(std::vector<RowVector<float>*> data, string outputFile = "./outputFile.csv");
 
@@ -48,6 +48,7 @@ public:
 	std::vector<unique_ptr<RowVector<float>>> neuronLayers; // stores the different layers of out network 
 	std::vector<unique_ptr<RowVector<float>>> cacheLayers; // stores the unactivated (activation fn not yet applied) values of layers 
 	std::vector<unique_ptr<RowVector<float>>> deltas; // stores the error contribution of each neurons 
+	std::vector<unique_ptr<RowVector<float>>> deltasCumulative; // stores the error contribution of each neurons 
 	std::vector<unique_ptr<Matrix<float>>> weights; // the connection weights itself 
 	std::vector<size_t> topology;
 	float learningRate; 
