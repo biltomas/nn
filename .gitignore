@@ -59,4 +59,5 @@ CMakeLists.txt.user*
 #continuos integration via gitlab ci
 .gitlab-ci.yml
 
-data/*
+#unignore RUN file
+RUN
