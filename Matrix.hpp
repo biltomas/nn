@@ -55,6 +55,8 @@ public:
     
 
     void setRandom();
+	void setZero();
+	void setNumber(float number);
 
 	
 	Matrix<T>& operator+=(const Matrix<T>& m2);

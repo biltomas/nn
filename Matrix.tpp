@@ -175,3 +175,21 @@ void Matrix<T>::setRandom() {
         // cout << v[i] << " ";
     }
 }
+
+template <typename T>
+void Matrix<T>::setZero() {
+    // std::generate(v.begin(), v.end(), (float) std::rand/RAND_MAX);
+    for (size_t i = 0; i < matrix_.size(); i++) {
+        matrix_[i] = 0;
+        // cout << v[i] << " ";
+    }
+}
+
+template <typename T>
+void Matrix<T>::setNumber(float number) {
+    // std::generate(v.begin(), v.end(), (float) std::rand/RAND_MAX);
+    for (size_t i = 0; i < matrix_.size(); i++) {
+        matrix_[i] = number + (static_cast<T>(std::rand()) / (static_cast<T>(RAND_MAX))/10);
+        // std::cout << matrix_[i] << " ";
+    }
+}
