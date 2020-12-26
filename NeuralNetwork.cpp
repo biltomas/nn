@@ -6,16 +6,36 @@
 // #include "RowVector.cpp"
 
 void softMax (const RowVector<float>& input, RowVector<float>& output) {
-	float max = 0;
-	float sum = 0;
-	for (uint i = 0; i < input.length(); i++) {
-		if (input.coeffRef(i) > max) { 
-            max = input.coeffRef(i);
-        }
-		sum += input.coeffRef(i);
+	// float max = 0;
+	// float sum = 0;
+	// for (uint i = 0; i < input.length(); i++) {
+	// 	if (input.coeffRef(i) > max) { 
+    //         max = input.coeffRef(i);
+    //     }
+	// 	sum += input.coeffRef(i);
+	// }
+	// for(uint f = 0; f < input.length(); f++)
+  	// 	output.setValue(f, exp(input.coeffRef(f) - max)/sum);
+
+	int i;
+	float m, sum, constant;
+
+	m = -10;
+	for (i = 0; i < input.length(); ++i) {
+		if (m < input.coeffRef(i)) {
+			m = input.coeffRef(i);
+		}
 	}
-	for(uint f = 0; f < input.length(); f++)
-  		output.setValue(f, exp(input.coeffRef(f) - max)/sum);
+
+	sum = 0.0;
+	for (i = 0; i < input.length(); ++i) {
+		sum += exp(input.coeffRef(i) - m);
+	}
+
+	constant = m + log(sum);
+	for (i = 0; i < input.length(); ++i) {
+		output.setValue(i, exp(input.coeffRef(i) - constant));
+	}
 }
 
 /*
@@ -217,6 +237,7 @@ void NeuralNetwork::calcErrors(RowVector<float>& output)
 		// cout << output.coeffRef(i) << " - " << neuronLayers.back()->coeffRef(i) << " = " << deltas.back()->coeffRef(i) << endl;
 		// cout << deltas.back()->coeffRef(i) << " ";
 	}
+	
 	// cout << endl;
     // (*deltas.back()) = output - (*neuronLayers.back()); 
 	// cout << "deltas.back size: " << (*deltas.back()).length() << endl;
