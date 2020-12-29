@@ -196,9 +196,9 @@ void NeuralNetwork::updateWeights()
         // if this layer not the output layer, there is a bias neuron and number of neurons specified = number of cols -1
 		// cout << endl << endl; 
         if (i != topology.size() - 2) { 
-#pragma omp parallel for num_threads(8)
-            for (unsigned c = 0; c < weights[i]->cols() - 1; c++) { 
-                for (uint r = 0; r < weights[i]->rows(); r++) { 
+            #pragma omp parallel for num_threads(16)
+            for (uint r = 0; r < weights[i]->rows(); r++) { 
+                for (unsigned c = 0; c < weights[i]->cols() - 1; c++) { 
 					float num = weights[i]->operator[]({r, c}) + learningRate * 
                         deltas[i + 1]->coeffRef(c) * 
                         activationFunctionDerivative(cacheLayers[i + 1]->coeffRef(c)) * 
@@ -210,8 +210,9 @@ void NeuralNetwork::updateWeights()
             } 
         } 
         else { 
-            for (uint c = 0; c < weights[i]->cols(); c++) { 
-                for (uint r = 0; r < weights[i]->rows(); r++) { 
+            #pragma omp parallel for num_threads(16)
+            for (uint r = 0; r < weights[i]->rows(); r++) { 
+                for (uint c = 0; c < weights[i]->cols(); c++) { 
 					float num = weights[i]->operator[]({r, c}) + learningRate * deltas[i + 1]->coeffRef(c) * activationFunctionDerivative(cacheLayers[i + 1]->coeffRef(c)) * neuronLayers[i]->coeffRef(r);
 					// cout << "derivative: " << activationFunctionDerivative(cacheLayers[i + 1]->coeffRef(c)) << " of " << cacheLayers[i + 1]->coeffRef(c) << endl;
 					// cout << "weight: " << i << " pos: " << r << ", " << c << " prev value " << weights[i]->coeffRef(r, c) << " set to " << num << endl;

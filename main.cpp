@@ -77,7 +77,7 @@ int main()
     // cout << "rows " << out_dat.back()->vector.rows() << endl;
     // cout << "cols "<< out_dat.back()->vector.cols() << endl;
     // cout << "value "<< out_dat.back()->coeffRef(0) << endl;
-    for (int i = 0; i < 5; i++) {
+    for (int i = 0; i < 1; i++) {
         std::cout << "Epoch " << i + 1 << " begins" << std::endl;
         n.train(in_dat, out_dat); 
         std::cout << "Validation starts" << std::endl;
