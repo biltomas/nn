@@ -196,6 +196,7 @@ void NeuralNetwork::updateWeights()
         // if this layer not the output layer, there is a bias neuron and number of neurons specified = number of cols -1
 		// cout << endl << endl; 
         if (i != topology.size() - 2) { 
+#pragma omp parallel for num_threads(8)
             for (unsigned c = 0; c < weights[i]->cols() - 1; c++) { 
                 for (uint r = 0; r < weights[i]->rows(); r++) { 
 					float num = weights[i]->operator[]({r, c}) + learningRate * 

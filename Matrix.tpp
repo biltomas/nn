@@ -118,8 +118,9 @@ Matrix<T> operator*(const Matrix<T> m1, const Matrix<T>& m2) {
 	// }
 	// cout << "m1 size: " << m1.size().first << ", " << m1.size().second << endl;
 	// cout << "m2 size: " << m2.size().first << ", " << m2.size().second << endl;
-	for (uint x = 0; x < m2.cols(); x++) {
-		for (uint y = 0; y < m1.rows(); y++) {
+#pragma omp parallel for num_threads(8)
+	for (uint y = 0; y < m1.rows(); y++) {
+	    for (uint x = 0; x < m2.cols(); x++) {
 			coordinates_target = std::make_pair(y,x); 
 			result[coordinates_target] = 0;
 			// cout << y << ", " << x << endl;
