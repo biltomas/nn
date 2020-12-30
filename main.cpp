@@ -35,28 +35,41 @@ std::vector<float> oneHotEncode(int out_dat, int num_classes) {
     return encoded;
 };
 
-int main() 
-{ 
-    DataLoader loader("../data/fashion_mnist_train_vectors.csv", "../data/fashion_mnist_train_labels.csv");
-    auto x = loader.load();
-    std::cout << "Number of entries of the dataset: " << x.size() << std::endl;
-
+std::pair<std::vector<RowVector<float>*>, std::vector<RowVector<float>>>
+encode_dataset(std::vector<item<float>>& dataset) {
     std::vector<RowVector<float>> out_dat;
     std::vector<RowVector<float>*> in_dat;
-    for (uint r = 0; r < x.size(); r++) { 
-        RowVector<float> label = RowVector<float>(oneHotEncode(x[r].label, 10));
+    for (uint r = 0; r < dataset.size(); r++) { 
+        RowVector<float> label = RowVector<float>(oneHotEncode(dataset[r].label, 10));
         
         out_dat.push_back(label);   
-        for (int i = 0; i<x[r].data.length();i++) {
-            x[r].data.setValue(i,x[r].data.coeffRef(i)/255);
+        for (size_t i = 0; i < dataset[r].data.length(); i++) {
+            dataset[r].data.setValue(i, dataset[r].data.coeffRef(i)/255);
         }
-        in_dat.push_back(&x[r].data);
+        in_dat.push_back(&dataset[r].data);
 
     }
-    float lr = 0.0215;
-    NeuralNetwork n({ 784, 1024, 10 }, lr); 
-    std::cout << "Train data: " << in_dat.size() << std::endl;
-    std::cout << "Train data[0] len: " << in_dat[0]->length() << std::endl;
+    return {in_dat, out_dat};
+}
+
+int main() 
+{ 
+    std::cout << "Loading the training dataset..." << std::endl;
+    DataLoader loader("../data/fashion_mnist_train_vectors.csv", "../data/fashion_mnist_train_labels.csv");
+    auto train_set = loader.load();
+    std::cout << "Creating a validation set..." << std::endl;
+    auto eval_set = loader.split_into_validation(train_set);
+    std::cout << "One-hot encoding the labels of the train set..." << std::endl;
+    auto encoded = encode_dataset(train_set);
+    auto& in_dat = encoded.first;
+    auto& out_dat = encoded.second;
+    std::cout << "One-hot encoding the labels of the eval set..." << std::endl;
+    auto encoded_eval = encode_dataset(eval_set);
+    auto& eval_in_dat = encoded_eval.first;
+    auto& eval_out_dat = encoded_eval.second;
+    std::cout << "Number of entries of the training set: " << train_set.size() << std::endl;
+    std::cout << "Number of entries of the validation set: " << eval_set.size() << std::endl;
+    NeuralNetwork n({ 784, 1024, 10 }, 0.005); 
     // std::vector<RowVector*> out_dat; 
     // std::vector<RowVector*> in_dat;
     // cout << out_dat.size() << endl;
@@ -64,9 +77,12 @@ int main()
     // cout << "rows " << out_dat.back()->vector.rows() << endl;
     // cout << "cols "<< out_dat.back()->vector.cols() << endl;
     // cout << "value "<< out_dat.back()->coeffRef(0) << endl;
-    for (int i = 0; i < 7; i++)
-        n.train(in_dat, out_dat, lr);
-        lr -= 0.0025; 
+    for (int i = 0; i < 1; i++) {
+        std::cout << "Epoch " << i + 1 << " begins" << std::endl;
+        n.train(in_dat, out_dat); 
+        std::cout << "Validation starts" << std::endl;
+        n.validate(eval_in_dat, eval_out_dat);
+    }
     
     DataLoader loader1("../data/fashion_mnist_test_vectors.csv", "../data/fashion_mnist_test_labels.csv");
     auto y = loader1.load();
@@ -77,7 +93,7 @@ int main()
         RowVector<float> label = RowVector<float>(oneHotEncode(y[r].label, 10));
         
         test_out_dat.push_back(label);   
-        for (int i = 0; i<y[r].data.length();i++) {
+        for (size_t i = 0; i<y[r].data.length();i++) {
             y[r].data.setValue(i,y[r].data.coeffRef(i)/255);
         }
         test_in_dat.push_back(&y[r].data);

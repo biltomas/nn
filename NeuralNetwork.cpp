@@ -5,6 +5,16 @@
 // #include "RowVector.hpp"
 // #include "RowVector.cpp"
 
+
+float crossEntropyLoss(const RowVector<float>& probabilities, const RowVector<float>& labels) {
+    float total = 0;
+    for (size_t i = 0; i < probabilities.length(); i++) {
+        total += labels.coeffRef(i) * log(probabilities.coeffRef(i)) +
+                (1 - labels.coeffRef(i)) * log(1 - probabilities.coeffRef(i));
+    }
+    return -1 * total;
+}
+
 RowVector<float> softMax (RowVector<float> input) {
 	float max = 0;
 	float sum = 0;
@@ -213,8 +223,9 @@ void NeuralNetwork::updateWeights()
         // if this layer not the output layer, there is a bias neuron and number of neurons specified = number of cols -1
 		// cout << endl << endl; 
         if (i != topology.size() - 2) { 
-            for (unsigned c = 0; c < weights[i]->cols() - 1; c++) { 
-                for (uint r = 0; r < weights[i]->rows(); r++) { 
+            #pragma omp parallel for num_threads(16)
+            for (uint r = 0; r < weights[i]->rows(); r++) { 
+                for (unsigned c = 0; c < weights[i]->cols() - 1; c++) { 
 					float num = weights[i]->operator[]({r, c}) + learningRate * 
                         deltas[i + 1]->coeffRef(c) * 
                         activationFunctionDerivative(cacheLayers[i + 1]->coeffRef(c)) * 
@@ -287,4 +298,27 @@ void NeuralNetwork::predict(std::vector<RowVector<float>*> data, string outputFi
 		myfile << result << "\n";
     } 
 	myfile.close();
+}
+
+void NeuralNetwork::validate(std::vector<RowVector<float>*> data, std::vector<RowVector<float>> labels) {
+    float loss = 0;
+    float correct_predictions = 0;
+    for (size_t current = 0; current < data.size(); current++) {
+        auto& image = *data[current];
+        auto& label = labels[current];
+        propagateForward(image);
+        const std::vector<float>& probabilities = neuronLayers.back()->data().to_vector();
+        const std::vector<float>& label_vector = label.data().to_vector();
+        //compute the loss
+        loss += crossEntropyLoss(*neuronLayers.back(), label);
+        unsigned top_class = std::distance(probabilities.begin(), std::max_element(probabilities.begin(),
+                                            probabilities.end()));
+        unsigned expected_class = std::distance(label_vector.begin(), std::max_element(label_vector.begin(),
+                                            label_vector.end()));
+        if (top_class == expected_class) {
+            correct_predictions++;
+        }
+    }
+    std::cout << "Validation accuracy: " << correct_predictions / data.size() << std::endl;
+    std::cout << "Average validation loss: " << loss / data.size() << std::endl;
 }

@@ -4,6 +4,7 @@
 #include <iostream>
 #include <fstream>
 #include <set>
+#include <array>
 #include "RowVector.hpp"
 
 template <typename T>
@@ -65,6 +66,15 @@ class DataLoader {
         return item<float> {parse_vector(raw_vec), parse_label(raw_label)};
     }
 
+    bool is_validation_satisfied(const std::array<unsigned, 10>& counter, const unsigned expected) const {
+        for (const auto value : counter) {
+            if (value != expected) {
+                return false;
+            }
+        }
+        return true;
+    }
+
 public:
     DataLoader(const std::string vec_path, const std::string label_path)
         : vec_path(vec_path)
@@ -92,5 +102,24 @@ public:
             }
         }
         return data;
+    }
+
+    std::vector<item<float>> split_into_validation(std::vector<item<float>>& dataset, const unsigned size = 1000) {
+        const unsigned class_size = size / 10;
+        std::array<unsigned, 10> counter;
+        counter.fill(0);
+        int offset = 1;
+        std::vector<item<float>> result;
+        while (!is_validation_satisfied(counter, class_size)) {
+            item<float> current = dataset[dataset.size() - offset];
+            if (counter[current.label] < class_size) {
+                result.push_back(current);
+                dataset.erase(dataset.end() - offset);
+                counter[current.label] += 1;
+            } else {
+                offset += 1;
+            }
+        }
+        return result;
     }
 };
