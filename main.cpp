@@ -69,7 +69,8 @@ int main()
     auto& eval_out_dat = encoded_eval.second;
     std::cout << "Number of entries of the training set: " << train_set.size() << std::endl;
     std::cout << "Number of entries of the validation set: " << eval_set.size() << std::endl;
-    NeuralNetwork n({ 784, 1024, 10 }, 0.005); 
+    float lr = 0.0215;
+    NeuralNetwork n({ 784, 1024, 10 }, lr); 
     // std::vector<RowVector*> out_dat; 
     // std::vector<RowVector*> in_dat;
     // cout << out_dat.size() << endl;
@@ -80,6 +81,7 @@ int main()
     for (int i = 0; i < 1; i++) {
         std::cout << "Epoch " << i + 1 << " begins" << std::endl;
         n.train(in_dat, out_dat); 
+        lr -= 0.0025;
         std::cout << "Validation starts" << std::endl;
         n.validate(eval_in_dat, eval_out_dat);
     }
