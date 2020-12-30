@@ -27,17 +27,35 @@ RowVector<float> softMax (RowVector<float> input) {
 	return input;
 }
 
+float outputActivationFunction(float x) 
+{ 
+    // return 0.5*tanhf(x) + 0.5; 
+	return 1 / ( 1+exp(-x));
+	// return x < 0 ? 0.01*x : x;
+} 
+  
+float outputActivationFunctionDerivative(float x) 
+{ 
+    // return 0.5*(1 - tanhf(x) * tanhf(x)); 
+	return outputActivationFunction(x)*(1-outputActivationFunction(x));
+	// return x < 0 ? 0.01 : 1;
+}
+
 
 float activationFunction(float x) 
 { 
-    // return tanhf(x); 
-	return 1 / ( 1+exp(-x));
+    // return 0.5*tanhf(x) + 0.5; 
+	// return 1 / ( 1+exp(-x));
+	// return x < 0 ? 0.01*x : x;
+	return x < 0 ? 0.24*(exp(x) -1) : x;
 } 
   
 float activationFunctionDerivative(float x) 
 { 
-    // return 1 - tanhf(x) * tanhf(x); 
-	return activationFunction(x)*(1-activationFunction(x));
+    // return 0.5*(1 - tanhf(x) * tanhf(x)); 
+	// return activationFunction(x)*(1-activationFunction(x));
+	// return x < 0 ? 0.01 : 1;
+	return x < 0 ? activationFunction(x)+0.24 : 1;
 }
 
 
@@ -84,7 +102,8 @@ NeuralNetwork::NeuralNetwork(vector<size_t> topology, float learningRate)
 				weights.push_back(make_unique<Matrix<float>>(vector, topology[i - 1] + 1)); 
 				// printf("NeuralNetwork 2.3\n");
 				// weights.back()->setRandom();
-				weights.back()->setNumber(0.00166666666);
+				// weights.back()->setNumber(sqrt(3/284));
+				weights.back()->setNumber(sqrt(1/2840));
 				// printf("NeuralNetwork 2.4\n");
                 auto fst = topology[i - 1];
                 auto snd = topology[i];
@@ -103,7 +122,8 @@ NeuralNetwork::NeuralNetwork(vector<size_t> topology, float learningRate)
 				// printf("NeuralNetwork 2.3\n");
 				weights.push_back(make_unique<Matrix<float>>(topology[i - 1] + 1, topology[i])); 
 				// weights.back()->setRandom(); 
-				weights.back()->setNumber(0.00048828125);
+				// weights.back()->setNumber(sqrt(3/1024));
+				weights.back()->setNumber(sqrt(1/1024));
 			} 
 		} 
 	}
@@ -131,9 +151,16 @@ void NeuralNetwork::propagateForward(RowVector<float>& input)
 		(*cacheLayers[i]) = (*neuronLayers[i - 1]) * (*weights[i - 1]);
 		// cout << "neuron " << i-1 << ": " << (*neuronLayers[i - 1]) << endl; 
 		// cout << "cache " << i << ": " << *cacheLayers[i] << endl;
-		for (uint ii = 0; ii < neuronLayers[i]->length(); ii++) {
-			neuronLayers[i]->setValue(ii, activationFunction(neuronLayers[i]->coeffRef(ii)));
+		if (i != topology.size() - 1) {
+			for (uint ii = 0; ii < neuronLayers[i]->length(); ii++) {
+				neuronLayers[i]->setValue(ii, activationFunction(neuronLayers[i]->coeffRef(ii)));
+			}
+		} else {
+			for (uint ii = 0; ii < neuronLayers[i]->length(); ii++) {
+				neuronLayers[i]->setValue(ii, outputActivationFunction(neuronLayers[i]->coeffRef(ii)));
+			}
 		}
+		
 		// cout << "cache " << i << " size " << cacheLayers[i]->vector.cols() << endl;
 		// cout << "cache " << i << ": ";
 		// for (uint ii = 0; ii < cacheLayers[i]->vector.cols(); ii++){
@@ -210,12 +237,11 @@ void NeuralNetwork::updateWeights()
             } 
         } 
         else { 
-            #pragma omp parallel for num_threads(16)
-            for (uint r = 0; r < weights[i]->rows(); r++) { 
-                for (uint c = 0; c < weights[i]->cols(); c++) { 
-					float num = weights[i]->operator[]({r, c}) + learningRate * deltas[i + 1]->coeffRef(c) * activationFunctionDerivative(cacheLayers[i + 1]->coeffRef(c)) * neuronLayers[i]->coeffRef(r);
+            for (uint c = 0; c < weights[i]->cols(); c++) { 
+                for (uint r = 0; r < weights[i]->rows(); r++) { 
+					float num = weights[i]->operator[]({r, c}) + learningRate * deltas[i + 1]->coeffRef(c) * outputActivationFunctionDerivative(cacheLayers[i + 1]->coeffRef(c)) * neuronLayers[i]->coeffRef(r);
 					// cout << "derivative: " << activationFunctionDerivative(cacheLayers[i + 1]->coeffRef(c)) << " of " << cacheLayers[i + 1]->coeffRef(c) << endl;
-					// cout << "weight: " << i << " pos: " << r << ", " << c << " prev value " << weights[i]->coeffRef(r, c) << " set to " << num << endl;
+					// cout << "weight: " << i << " pos: " << r << ", " << c << " prev value " << weights[i]->operator[]({r, c}) << " set to " << num << endl;
                     weights[i]->operator[]({r, c}) = num;
                 } 
             } 
@@ -230,9 +256,10 @@ void NeuralNetwork::propagateBackward(RowVector<float>& output)
     updateWeights(); 
 } 
 
-void NeuralNetwork::train(std::vector<RowVector<float>*> input_data, std::vector<RowVector<float>> output_data) 
+void NeuralNetwork::train(std::vector<RowVector<float>*> input_data, std::vector<RowVector<float>> output_data, float learningRate) 
 { 
 	// printf("train start\n");
+	this->learningRate = learningRate; 
     for (uint i = 0; i < input_data.size(); i++) { 
         // std::cout << "Input to neural network is : " << input_data[i] << std::endl; 
         propagateForward(*input_data[i]); 
