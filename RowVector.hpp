@@ -49,6 +49,11 @@ RowVector<T> operator*(RowVector<T>& m1, const Matrix<T>& m2) {
     return RowVector<T>((m1.data() * m2).to_vector());
 }
 
+template <typename T>
+RowVector<T> operator*(RowVector<T>& m1, const RowVector<T>& m2) {
+    return RowVector<T>((m1.data() * m2).to_vector());
+}
+
 
 template <typename T>
 RowVector<T> operator-(RowVector<T>& m1, const RowVector<T>& m2) {
