@@ -39,19 +39,20 @@ public:
 
     unsigned length() const { return vector_.size().second; }
 
-    const Matrix<T>& data() const {
+    Matrix<T>& data() {
         return vector_;
     }
 };
 
 template <typename T>
-RowVector<T> operator*(RowVector<T>& m1, const Matrix<T>& m2) {
-    return RowVector<T>((m1.data() * m2).to_vector());
+RowVector<T>& matmul(RowVector<T>& m1, Matrix<T>& m2, RowVector<T>& target) {
+    matmul(m1.data(), m2, target.data());
+    return target;
 }
 
 
 template <typename T>
-RowVector<T> operator-(RowVector<T>& m1, const RowVector<T>& m2) {
+RowVector<T> operator-(RowVector<T>& m1, RowVector<T>& m2) {
 	//return RowVector((m1.vector - m2.vector).to_vector());
     return RowVector<T>((m1.data() - m2.data()).to_vector());
 }

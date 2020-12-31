@@ -42,7 +42,8 @@ TEST_CASE("RowVector - operators") {
         Matrix<float> matrix(mat, 2);
         std::vector<float> vector {5, 1};
         RowVector<float> row_vec(vector);
-        auto result = row_vec * matrix;
+        RowVector<float> result(2);
+        matmul(row_vec, matrix, result);
         REQUIRE(result.length() == 2);
         std::vector<float> expected_result {7, 8};
         for (int i = 0; i < 2; i++) {

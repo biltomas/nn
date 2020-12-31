@@ -147,8 +147,8 @@ void NeuralNetwork::propagateForward(RowVector<float>& input)
         // already explained above 
 		// cout << "layer: " << i << endl;
 		// cout << "updating cache" << endl;
-        (*neuronLayers[i]) = (*neuronLayers[i - 1]) * (*weights[i - 1]);
-		(*cacheLayers[i]) = (*neuronLayers[i - 1]) * (*weights[i - 1]);
+        matmul(*neuronLayers[i - 1], *weights[i - 1], *neuronLayers[i]);
+		matmul(*neuronLayers[i - 1], *weights[i - 1], *cacheLayers[i]);
 		// cout << "neuron " << i-1 << ": " << (*neuronLayers[i - 1]) << endl; 
 		// cout << "cache " << i << ": " << *cacheLayers[i] << endl;
 		if (i != topology.size() - 1) {
@@ -208,7 +208,8 @@ void NeuralNetwork::calcErrors(RowVector<float>& output)
     // we will begin by the last hidden layer 
     // and we will continue till the first hidden layer 
     for (uint i = topology.size() - 2; i > 0; i--) { 
-        (*deltas[i]) = (*deltas[i + 1]) * (weights[i]->transpose()); 
+        matmul(*deltas[i + 1], weights[i]->transpose(), *deltas[i]); 
+        weights[i]->transpose(); //now transpose it back
     } 
 	// printf("calcErrors end");
 } 
@@ -223,7 +224,7 @@ void NeuralNetwork::updateWeights()
         // if this layer not the output layer, there is a bias neuron and number of neurons specified = number of cols -1
 		// cout << endl << endl; 
         if (i != topology.size() - 2) { 
-            #pragma omp parallel for num_threads(16)
+            #pragma omp parallel for num_threads(4)
             for (uint r = 0; r < weights[i]->rows(); r++) { 
                 for (unsigned c = 0; c < weights[i]->cols() - 1; c++) { 
 					float num = weights[i]->operator[]({r, c}) + learningRate * 
@@ -237,6 +238,7 @@ void NeuralNetwork::updateWeights()
             } 
         } 
         else { 
+            #pragma omp parallel for num_threads(4)
             for (uint c = 0; c < weights[i]->cols(); c++) { 
                 for (uint r = 0; r < weights[i]->rows(); r++) { 
 					float num = weights[i]->operator[]({r, c}) + learningRate * deltas[i + 1]->coeffRef(c) * outputActivationFunctionDerivative(cacheLayers[i + 1]->coeffRef(c)) * neuronLayers[i]->coeffRef(r);
@@ -256,11 +258,14 @@ void NeuralNetwork::propagateBackward(RowVector<float>& output)
     updateWeights(); 
 } 
 
-void NeuralNetwork::train(std::vector<RowVector<float>*> input_data, std::vector<RowVector<float>> output_data, float learningRate) 
+void NeuralNetwork::train(std::vector<RowVector<float>*> input_data, std::vector<RowVector<float>>& output_data, float learningRate) 
 { 
 	// printf("train start\n");
 	this->learningRate = learningRate; 
     for (uint i = 0; i < input_data.size(); i++) { 
+        if (i % 1000 == 0) {
+            std::cout << "Checkpoint: " << i + 1 << " out of 59,000" << std::endl;
+        }
         // std::cout << "Input to neural network is : " << input_data[i] << std::endl; 
         propagateForward(*input_data[i]); 
         // std::cout << "Expected output is : "; 
