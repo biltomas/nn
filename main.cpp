@@ -54,6 +54,7 @@ encode_dataset(std::vector<item<float>>& dataset) {
 
 int main() 
 { 
+    std::srand(time(NULL));
     std::cout << "Loading the training dataset..." << std::endl;
     DataLoader loader("../data/fashion_mnist_train_vectors.csv", "../data/fashion_mnist_train_labels.csv");
     auto train_set = loader.load();

@@ -100,8 +100,8 @@ Matrix<T>& matmul(Matrix<T>& m1, Matrix<T>& m2, Matrix<T>& target) {
     }
 	std::pair <uint,uint> coordinates_m1;
 	std::pair <uint,uint> coordinates_m2;
-    const unsigned BLOCK_SIZE = 8;
     /*
+    const unsigned BLOCK_SIZE = 8;
 	for (uint target_y = 0; target_y < m1.rows(); target_y++) {
 	    for (uint target_x = 0; target_x < m2.cols(); target_x += BLOCK_SIZE) {
 			for (uint shared_axis = 0; shared_axis < m1.cols(); shared_axis++){
@@ -113,12 +113,11 @@ Matrix<T>& matmul(Matrix<T>& m1, Matrix<T>& m2, Matrix<T>& target) {
 			}
 		}
 	}*/
-	for (uint target_y = 0; target_y < m1.rows(); target_y++) {
-	    for (uint target_x = 0; target_x < m2.cols(); target_x++) {
-			for (uint shared_axis = 0; shared_axis < m1.cols(); shared_axis++){
-				coordinates_m1 = std::make_pair(target_y, shared_axis); 
-                coordinates_m2 = std::make_pair(shared_axis, target_x); 
-                target[{target_y, target_x}] += m1[coordinates_m1] * m2[coordinates_m2];
+    #pragma omp parallel for shared(m1, m2, target) num_threads(8) 
+	for (uint target_x = 0; target_x < m2.cols(); target_x++) {
+	    for (uint target_y = 0; target_y < m1.rows(); target_y++) {
+			for (uint shared_axis = 0; shared_axis < m1.cols(); shared_axis++) {
+                target[{target_y, target_x}] += m1[{target_y, shared_axis}] * m2[{shared_axis, target_x}];
 			}
 		}
 	}

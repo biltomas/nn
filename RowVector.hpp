@@ -39,6 +39,11 @@ public:
 
     unsigned length() const { return vector_.size().second; }
 
+    RowVector<T>& operator-=(const RowVector<T>& m1) {
+        data() -= m1.data();
+        return *this;
+    }
+
     Matrix<T>& data() {
         return vector_;
     }

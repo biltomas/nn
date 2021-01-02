@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.0)
 project(pv021)
 
-set(CMAKE_CXX_COMPILER "clang++")
+set(CMAKE_CXX_COMPILER "g++")
 
 if (CMAKE_CXX_COMPILER_ID MATCHES Clang OR ${CMAKE_CXX_COMPILER_ID} STREQUAL GNU)
     # using regular Clang or AppleClang or GCC
