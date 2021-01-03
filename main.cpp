@@ -53,7 +53,7 @@ int main()
         in_dat.push_back(&x[r].data);
 
     }
-    float lr = 0.0225;
+    float lr = 0.0216;
     // float lr = 0.03;
     NeuralNetwork n({ 784, 1024, 10 }, lr); 
     std::cout << "Train data: " << in_dat.size() << std::endl;
@@ -65,9 +65,11 @@ int main()
     // cout << "rows " << out_dat.back()->vector.rows() << endl;
     // cout << "cols "<< out_dat.back()->vector.cols() << endl;
     // cout << "value "<< out_dat.back()->coeffRef(0) << endl;
-    for (int i = 0; i < 3; i++)
+    for (int i = 0; i < 4; i++) {
         n.train(in_dat, out_dat, lr);
-        lr *= 0.95; 
+        lr *= 0.91;
+        cout << lr << endl; 
+    }
     
     DataLoader loader1("../data/fashion_mnist_test_vectors.csv", "../data/fashion_mnist_test_labels.csv");
     auto y = loader1.load();

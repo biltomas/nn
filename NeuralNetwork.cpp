@@ -6,17 +6,6 @@
 // #include "RowVector.cpp"
 
 void softMax (const RowVector<float>& input, RowVector<float>& output) {
-	// float max = 0;
-	// float sum = 0;
-	// for (uint i = 0; i < input.length(); i++) {
-	// 	if (input.coeffRef(i) > max) { 
-    //         max = input.coeffRef(i);
-    //     }
-	// 	sum += input.coeffRef(i);
-	// }
-	// for(uint f = 0; f < input.length(); f++)
-  	// 	output.setValue(f, exp(input.coeffRef(f) - max)/sum);
-
 	int i;
 	float m, sum, constant;
 
@@ -36,6 +25,17 @@ void softMax (const RowVector<float>& input, RowVector<float>& output) {
 	for (i = 0; i < input.length(); ++i) {
 		output.setValue(i, exp(input.coeffRef(i) - constant));
 	}
+	// for (int i = 0; i < input.length(); i++) {
+	// 	output.setValue(i, exp(input.coeffRef(i)));
+	// }
+	// float sum = 0.0f;
+	// for (int i = 0; i < input.length(); i++) {
+	// 	sum += output.coeffRef(i);
+	// }
+	// sum = 1/sum;
+	// for (int i = 0; i < input.length(); i++) {
+	// 	output.setValue(i, output.coeffRef(i)*sum);
+	// }
 }
 
 void softMaxDerivative (const RowVector<float>& input, RowVector<float>& output) {
@@ -141,12 +141,13 @@ NeuralNetwork::NeuralNetwork(vector<size_t> topology, float learningRate)
 		if (i > 0) { 
 			if (i != topology.size() - 1) { 
 				// printf("NeuralNetwork 2.1\n");
-				cout << weights.size() << endl;
+				// cout << weights.size() << endl;
 				std::size_t size = (topology[i - 1] + 1) * (topology[i] + 1);
 				std::vector<float> vector(size, 0.0f);
 				
 				// printf("NeuralNetwork 2.2\n");
-				weights.push_back(make_unique<Matrix<float>>(vector, topology[i - 1] + 1)); 
+				weights.push_back(make_unique<Matrix<float>>(vector, topology[i - 1] + 1));
+				momentum.push_back(make_unique<Matrix<float>>(vector, topology[i - 1] + 1)); 
 				// printf("NeuralNetwork 2.3\n");
 				// weights.back()->setRandom();
 				// weights.back()->setNumber(sqrt(3/284));
@@ -168,6 +169,9 @@ NeuralNetwork::NeuralNetwork(vector<size_t> topology, float learningRate)
 			else { 
 				// printf("NeuralNetwork 2.3\n");
 				weights.push_back(make_unique<Matrix<float>>(topology[i - 1] + 1, topology[i])); 
+				std::size_t size = (topology[i - 1] + 1) * (topology[i]);
+				std::vector<float> vector(size, 0.0f);
+				momentum.push_back(make_unique<Matrix<float>>(vector, topology[i - 1] + 1)); 
 				// weights.back()->setRandom(); 
 				// weights.back()->setNumber(sqrt(3/1024));
 				weights.back()->setNumber(sqrt(1/1024));
@@ -297,7 +301,9 @@ void NeuralNetwork::updateWeights()
                         neuronLayers[i]->coeffRef(r);
 					// cout << "derivative: " << activationFunctionDerivative(cacheLayers[i + 1]->coeffRef(c)) << " of " << cacheLayers[i + 1]->coeffRef(c) << endl;
 					// cout << "weight: " << i << " pos: " << r << ", " << c << " prev value " << weights[i]->coeffRef(r, c) << " set to " << num << endl;
-                    weights[i]->operator[]({r, c}) = num; 
+
+                    weights[i]->operator[]({r, c}) = (num + momentum[i]->operator[]({r, c}))/2; 
+					momentum[i]->operator[]({r, c}) = (num + momentum[i]->operator[]({r, c}))/2;
                 } 
             } 
         } 
@@ -310,7 +316,8 @@ void NeuralNetwork::updateWeights()
 					float num = weights[i]->operator[]({r, c}) + learningRate * neuronLayers[topology.size()-2]->coeffRef(r) * activation_gradients_[c];
 					// cout << "derivative: " << activationFunctionDerivative(cacheLayers[i + 1]->coeffRef(c)) << " of " << cacheLayers[i + 1]->coeffRef(c) << endl;
 					// cout << "weight: " << i << " pos: " << r << ", " << c << " prev value " << weights[i]->operator[]({r, c}) << " set to " << num << endl;
-                    weights[i]->operator[]({r, c}) = num;
+                    weights[i]->operator[]({r, c}) = (num + momentum[i]->operator[]({r, c}))/2;
+					momentum[i]->operator[]({r, c}) = (num + momentum[i]->operator[]({r, c}))/2;
                 } 
             } 
         } 
@@ -359,10 +366,10 @@ void NeuralNetwork::predict(std::vector<RowVector<float>*> data, string outputFi
 				result = ii;
 			}
 		};
-		std::cout << endl << "Output produced is : ";
-		for(unsigned i=0; i< neuronLayers.back()->length(); ++i)
-  			std::cout << neuronLayers.back()->coeffRef(i) << ' '; 
-		cout << endl << "predicted label is: " << result << endl;
+		// std::cout << endl << "Output produced is : ";
+		// for(unsigned i=0; i< neuronLayers.back()->length(); ++i)
+  		// 	std::cout << neuronLayers.back()->coeffRef(i) << ' '; 
+		// cout << endl << "predicted label is: " << result << endl;
 		myfile << result << "\n";
     } 
 	myfile.close();

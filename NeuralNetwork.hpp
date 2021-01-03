@@ -49,6 +49,7 @@ public:
 	std::vector<unique_ptr<RowVector<float>>> cacheLayers; // stores the unactivated (activation fn not yet applied) values of layers 
 	std::vector<unique_ptr<RowVector<float>>> deltas; // stores the error contribution of each neurons 
 	std::vector<unique_ptr<Matrix<float>>> weights; // the connection weights itself 
+	std::vector<unique_ptr<Matrix<float>>> momentum;
 	std::vector<size_t> topology;
 	std::vector<float> activation_gradients_;
 	float learningRate; 
