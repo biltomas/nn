@@ -15,16 +15,70 @@ float crossEntropyLoss(const RowVector<float>& probabilities, const RowVector<fl
     return -1 * total;
 }
 
-RowVector<float> softMax (RowVector<float> input) {
-	float max = 0;
-	float sum = 0;
-	for (uint i = 0; i < input.length(); i++) {
-		if (input.coeffRef(i) > max) max = input.coeffRef(i);
-		sum += input.coeffRef(i);
+void softMax (const RowVector<float>& input, RowVector<float>& output) {
+	// float max = 0;
+	// float sum = 0;
+	// for (uint i = 0; i < input.length(); i++) {
+	// 	if (input.coeffRef(i) > max) { 
+    //         max = input.coeffRef(i);
+    //     }
+	// 	sum += input.coeffRef(i);
+	// }
+	// for(uint f = 0; f < input.length(); f++)
+  	// 	output.setValue(f, exp(input.coeffRef(f) - max)/sum);
+
+	int i;
+	float m, sum, constant;
+
+	m = -10;
+	for (i = 0; i < input.length(); ++i) {
+		if (m < input.coeffRef(i)) {
+			m = input.coeffRef(i);
+		}
 	}
-	for(uint f = 0; f < input.length(); f++)
-  		input.setValue(f, exp(input.coeffRef(f) - max)/sum);
-	return input;
+
+	sum = 0.0;
+	for (i = 0; i < input.length(); ++i) {
+		sum += exp(input.coeffRef(i) - m);
+	}
+
+	constant = m + log(sum);
+	for (i = 0; i < input.length(); ++i) {
+		output.setValue(i, exp(input.coeffRef(i) - constant));
+	}
+}
+
+void softMaxDerivative (const RowVector<float>& input, RowVector<float>& output) {
+	// float max = 0;
+	// float sum = 0;
+	// for (uint i = 0; i < input.length(); i++) {
+	// 	if (input.coeffRef(i) > max) { 
+    //         max = input.coeffRef(i);
+    //     }
+	// 	sum += input.coeffRef(i);
+	// }
+	// for(uint f = 0; f < input.length(); f++)
+  	// 	output.setValue(f, exp(input.coeffRef(f) - max)/sum);
+	vector<float> exps;
+	int i;
+	float sum = 0.0;
+	float temp;
+	for (i = 0; i < input.length(); ++i) {
+		temp = exp(input.coeffRef(i));
+		sum += temp;
+		exps.push_back(temp);
+	}
+	sum *= sum;
+	for (i = 0; i <input.length(); i++) {
+		float tempSum = 0.0f;
+		for (int ii = 0; ii < input.length(); ii++) {
+			if (ii != i) {
+				tempSum += input.coeffRef(ii);
+			}
+		}
+		temp = exps[i] * tempSum / sum;
+		output.setValue(i, temp);
+	}
 }
 
 float outputActivationFunction(float x) 
@@ -65,6 +119,9 @@ NeuralNetwork::NeuralNetwork(vector<size_t> topology, float learningRate)
 	// printf("NeuralNetwork start\n");
 	this->topology = topology; 
 	this->learningRate = learningRate; 
+	for (int i = 0; i < topology[topology.size()-1]; i++) {
+		activation_gradients_.push_back(0.0f);
+	}
 	for (uint i = 0; i < topology.size(); i++) { 
 		// initialze neuron layers 
         std::vector<float> vector;
@@ -156,9 +213,10 @@ void NeuralNetwork::propagateForward(RowVector<float>& input)
 				neuronLayers[i]->setValue(ii, activationFunction(neuronLayers[i]->coeffRef(ii)));
 			}
 		} else {
-			for (uint ii = 0; ii < neuronLayers[i]->length(); ii++) {
-				neuronLayers[i]->setValue(ii, outputActivationFunction(neuronLayers[i]->coeffRef(ii)));
-			}
+			softMax(*neuronLayers[i], *neuronLayers[i]);
+			// for (uint ii = 0; ii < neuronLayers[i]->length(); ii++) {
+			// 	neuronLayers[i]->setValue(ii, outputActivationFunction(neuronLayers[i]->coeffRef(ii)));
+			// }
 		}
 		
 		// cout << "cache " << i << " size " << cacheLayers[i]->vector.cols() << endl;
@@ -194,11 +252,29 @@ void NeuralNetwork::calcErrors(RowVector<float>& output)
 	// cout << "delats size" << deltas.size() << endl;
 	// cout << "output size: " << output.length() << endl;
 	// cout << "pred size: " << (*neuronLayers.back()).length() << endl;
+	
 	for (int i = 0; i < output.length(); i++) {
 		deltas.back()->setValue(i, output.coeffRef(i) - neuronLayers.back()->coeffRef(i));
 		// cout << output.coeffRef(i) << " - " << neuronLayers.back()->coeffRef(i) << " = " << deltas.back()->coeffRef(i) << endl;
 		// cout << deltas.back()->coeffRef(i) << " ";
 	}
+	for (int i = 0; i < output.length(); i++) {
+		float activation_grad = 0.0f;
+		for (int j = 0; j < output.length(); j++) {
+			// cout << i << j << endl;
+			if (i == j)
+                {
+                    activation_grad += neuronLayers.back()->coeffRef(i) * (1.0f - neuronLayers.back()->coeffRef(i))* deltas.back()->coeffRef(j);
+                }
+                else
+                {
+                    activation_grad += -neuronLayers.back()->coeffRef(i) * neuronLayers.back()->coeffRef(j) * deltas.back()->coeffRef(j);
+                }
+		}
+		// cout << "activation_grad " << activation_grad << endl;
+		activation_gradients_[i] = activation_grad;
+	}
+
 	// cout << endl;
     // (*deltas.back()) = output - (*neuronLayers.back()); 
 	// cout << "deltas.back size: " << (*deltas.back()).length() << endl;
@@ -241,7 +317,8 @@ void NeuralNetwork::updateWeights()
             #pragma omp parallel for num_threads(8)
             for (uint c = 0; c < weights[i]->cols(); c++) { 
                 for (uint r = 0; r < weights[i]->rows(); r++) { 
-					float num = weights[i]->operator[]({r, c}) + learningRate * deltas[i + 1]->coeffRef(c) * outputActivationFunctionDerivative(cacheLayers[i + 1]->coeffRef(c)) * neuronLayers[i]->coeffRef(r);
+					// float num = weights[i]->operator[]({r, c}) + learningRate * deltas[i + 1]->coeffRef(c) * (cacheLayers[i + 1]->coeffRef(c)) * neuronLayers[i]->coeffRef(r);
+					float num = weights[i]->operator[]({r, c}) + learningRate * neuronLayers[topology.size()-2]->coeffRef(r) * activation_gradients_[c];
 					// cout << "derivative: " << activationFunctionDerivative(cacheLayers[i + 1]->coeffRef(c)) << " of " << cacheLayers[i + 1]->coeffRef(c) << endl;
 					// cout << "weight: " << i << " pos: " << r << ", " << c << " prev value " << weights[i]->operator[]({r, c}) << " set to " << num << endl;
                     weights[i]->operator[]({r, c}) = num;

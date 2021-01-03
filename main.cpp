@@ -49,6 +49,7 @@ encode_dataset(std::vector<item<float>>& dataset) {
         in_dat.push_back(&dataset[r].data);
 
     }
+<<<<<<< main.cpp
     return {in_dat, out_dat};
 }
 
@@ -70,7 +71,8 @@ int main()
     auto& eval_out_dat = encoded_eval.second;
     std::cout << "Number of entries of the training set: " << train_set.size() << std::endl;
     std::cout << "Number of entries of the validation set: " << eval_set.size() << std::endl;
-    float lr = 0.0215;
+    float lr = 0.0225;
+    // float lr = 0.03;
     NeuralNetwork n({ 784, 1024, 10 }, lr); 
     // std::vector<RowVector*> out_dat; 
     // std::vector<RowVector*> in_dat;
@@ -82,7 +84,7 @@ int main()
     for (int i = 0; i < 1; i++) {
         std::cout << "Epoch " << i + 1 << " begins" << std::endl;
         n.train(in_dat, out_dat); 
-        lr -= 0.0025;
+        lr *= 0.95;
         std::cout << "Validation starts" << std::endl;
         n.validate(eval_in_dat, eval_out_dat);
     }
