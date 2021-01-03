@@ -224,9 +224,9 @@ void NeuralNetwork::updateWeights()
         // if this layer not the output layer, there is a bias neuron and number of neurons specified = number of cols -1
 		// cout << endl << endl; 
         if (i != topology.size() - 2) { 
-            #pragma omp parallel for num_threads(4)
-            for (uint r = 0; r < weights[i]->rows(); r++) { 
-                for (unsigned c = 0; c < weights[i]->cols() - 1; c++) { 
+            #pragma omp parallel for num_threads(8)
+            for (unsigned c = 0; c < weights[i]->cols() - 1; c++) { 
+                for (uint r = 0; r < weights[i]->rows(); r++) { 
 					float num = weights[i]->operator[]({r, c}) + learningRate * 
                         deltas[i + 1]->coeffRef(c) * 
                         activationFunctionDerivative(cacheLayers[i + 1]->coeffRef(c)) * 
@@ -238,7 +238,7 @@ void NeuralNetwork::updateWeights()
             } 
         } 
         else { 
-            #pragma omp parallel for num_threads(4)
+            #pragma omp parallel for num_threads(8)
             for (uint c = 0; c < weights[i]->cols(); c++) { 
                 for (uint r = 0; r < weights[i]->rows(); r++) { 
 					float num = weights[i]->operator[]({r, c}) + learningRate * deltas[i + 1]->coeffRef(c) * outputActivationFunctionDerivative(cacheLayers[i + 1]->coeffRef(c)) * neuronLayers[i]->coeffRef(r);
@@ -305,7 +305,7 @@ void NeuralNetwork::predict(std::vector<RowVector<float>*> data, string outputFi
 	myfile.close();
 }
 
-void NeuralNetwork::validate(std::vector<RowVector<float>*> data, std::vector<RowVector<float>> labels) {
+void NeuralNetwork::validate(std::vector<RowVector<float>*>& data, std::vector<RowVector<float>>& labels) {
     float loss = 0;
     float correct_predictions = 0;
     for (size_t current = 0; current < data.size(); current++) {

@@ -153,7 +153,6 @@ Matrix<T>& Matrix<T>::transpose() {
 			newMatrix[{col, row}] = operator[]({row, col});
 		}
 	}
-	return newMatrix;
     */
     transposed = !transposed;
     std::swap(rows_, cols_);

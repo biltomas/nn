@@ -38,7 +38,7 @@ public:
 
 	void predict(std::vector<RowVector<float>*> data, string outputFile = "./outputFile.csv");
 
-    void validate(std::vector<RowVector<float>*> data, std::vector<RowVector<float>> labels);
+    void validate(std::vector<RowVector<float>*>& data, std::vector<RowVector<float>>& labels);
 
 	// storage objects for working of neural network 
 	/* 
