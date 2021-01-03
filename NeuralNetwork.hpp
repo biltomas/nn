@@ -53,5 +53,6 @@ public:
 	std::vector<unique_ptr<Matrix<float>>> weights; // the connection weights itself 
 	std::vector<size_t> topology;
 	std::vector<float> activation_gradients_;
+    std::vector<unique_ptr<Matrix<float>>> momentum;
 	float learningRate; 
 }; 

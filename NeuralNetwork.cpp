@@ -27,7 +27,7 @@ void softMax (const RowVector<float>& input, RowVector<float>& output) {
 	// for(uint f = 0; f < input.length(); f++)
   	// 	output.setValue(f, exp(input.coeffRef(f) - max)/sum);
 
-	int i;
+	size_t i;
 	float m, sum, constant;
 
 	m = -10;
@@ -60,7 +60,7 @@ void softMaxDerivative (const RowVector<float>& input, RowVector<float>& output)
 	// for(uint f = 0; f < input.length(); f++)
   	// 	output.setValue(f, exp(input.coeffRef(f) - max)/sum);
 	vector<float> exps;
-	int i;
+	size_t i;
 	float sum = 0.0;
 	float temp;
 	for (i = 0; i < input.length(); ++i) {
@@ -71,7 +71,7 @@ void softMaxDerivative (const RowVector<float>& input, RowVector<float>& output)
 	sum *= sum;
 	for (i = 0; i <input.length(); i++) {
 		float tempSum = 0.0f;
-		for (int ii = 0; ii < input.length(); ii++) {
+		for (size_t ii = 0; ii < input.length(); ii++) {
 			if (ii != i) {
 				tempSum += input.coeffRef(ii);
 			}
@@ -84,14 +84,14 @@ void softMaxDerivative (const RowVector<float>& input, RowVector<float>& output)
 float outputActivationFunction(float x) 
 { 
     // return 0.5*tanhf(x) + 0.5; 
-	return 1 / ( 1+exp(-x));
+	return 1 / (1 + exp(-x));
 	// return x < 0 ? 0.01*x : x;
 } 
   
 float outputActivationFunctionDerivative(float x) 
 { 
     // return 0.5*(1 - tanhf(x) * tanhf(x)); 
-	return outputActivationFunction(x)*(1-outputActivationFunction(x));
+	return outputActivationFunction(x) * (1 - outputActivationFunction(x));
 	// return x < 0 ? 0.01 : 1;
 }
 
@@ -101,7 +101,7 @@ float activationFunction(float x)
     // return 0.5*tanhf(x) + 0.5; 
 	// return 1 / ( 1+exp(-x));
 	// return x < 0 ? 0.01*x : x;
-	return x < 0 ? 0.24*(exp(x) -1) : x;
+	return x < 0 ? 0.24 * (exp(x) - 1) : x;
 } 
   
 float activationFunctionDerivative(float x) 
@@ -115,11 +115,11 @@ float activationFunctionDerivative(float x)
 
 // constructor of neural network class 
 NeuralNetwork::NeuralNetwork(vector<size_t> topology, float learningRate) 
-{ 
+{
 	// printf("NeuralNetwork start\n");
 	this->topology = topology; 
 	this->learningRate = learningRate; 
-	for (int i = 0; i < topology[topology.size()-1]; i++) {
+	for (size_t i = 0; i < topology[topology.size()-1]; i++) {
 		activation_gradients_.push_back(0.0f);
 	}
 	for (uint i = 0; i < topology.size(); i++) { 
@@ -151,12 +151,13 @@ NeuralNetwork::NeuralNetwork(vector<size_t> topology, float learningRate)
 		if (i > 0) { 
 			if (i != topology.size() - 1) { 
 				// printf("NeuralNetwork 2.1\n");
-				cout << weights.size() << endl;
+				// cout << weights.size() << endl;
 				std::size_t size = (topology[i - 1] + 1) * (topology[i] + 1);
 				std::vector<float> vector(size, 0.0f);
 				
 				// printf("NeuralNetwork 2.2\n");
-				weights.push_back(make_unique<Matrix<float>>(vector, topology[i - 1] + 1)); 
+				weights.push_back(make_unique<Matrix<float>>(vector, topology[i - 1] + 1));
+				momentum.push_back(make_unique<Matrix<float>>(vector, topology[i - 1] + 1)); 
 				// printf("NeuralNetwork 2.3\n");
 				// weights.back()->setRandom();
 				// weights.back()->setNumber(sqrt(3/284));
@@ -178,6 +179,9 @@ NeuralNetwork::NeuralNetwork(vector<size_t> topology, float learningRate)
 			else { 
 				// printf("NeuralNetwork 2.3\n");
 				weights.push_back(make_unique<Matrix<float>>(topology[i - 1] + 1, topology[i])); 
+				std::size_t size = (topology[i - 1] + 1) * (topology[i]);
+				std::vector<float> vector(size, 0.0f);
+				momentum.push_back(make_unique<Matrix<float>>(vector, topology[i - 1] + 1)); 
 				// weights.back()->setRandom(); 
 				// weights.back()->setNumber(sqrt(3/1024));
 				weights.back()->setNumber(sqrt(1/1024));
@@ -185,7 +189,7 @@ NeuralNetwork::NeuralNetwork(vector<size_t> topology, float learningRate)
 		} 
 	}
 	// printf("NeuralNetwork end\n");
-}; 
+}
 
 void NeuralNetwork::propagateForward(RowVector<float>& input) 
 { 
@@ -205,7 +209,7 @@ void NeuralNetwork::propagateForward(RowVector<float>& input)
 		// cout << "layer: " << i << endl;
 		// cout << "updating cache" << endl;
         matmul(*neuronLayers[i - 1], *weights[i - 1], *neuronLayers[i]);
-		matmul(*neuronLayers[i - 1], *weights[i - 1], *cacheLayers[i]);
+		*cacheLayers[i] = *neuronLayers[i];
 		// cout << "neuron " << i-1 << ": " << (*neuronLayers[i - 1]) << endl; 
 		// cout << "cache " << i << ": " << *cacheLayers[i] << endl;
 		if (i != topology.size() - 1) {
@@ -253,14 +257,14 @@ void NeuralNetwork::calcErrors(RowVector<float>& output)
 	// cout << "output size: " << output.length() << endl;
 	// cout << "pred size: " << (*neuronLayers.back()).length() << endl;
 	
-	for (int i = 0; i < output.length(); i++) {
+	for (size_t i = 0; i < output.length(); i++) {
 		deltas.back()->setValue(i, output.coeffRef(i) - neuronLayers.back()->coeffRef(i));
 		// cout << output.coeffRef(i) << " - " << neuronLayers.back()->coeffRef(i) << " = " << deltas.back()->coeffRef(i) << endl;
 		// cout << deltas.back()->coeffRef(i) << " ";
 	}
-	for (int i = 0; i < output.length(); i++) {
+	for (size_t i = 0; i < output.length(); i++) {
 		float activation_grad = 0.0f;
-		for (int j = 0; j < output.length(); j++) {
+		for (size_t j = 0; j < output.length(); j++) {
 			// cout << i << j << endl;
 			if (i == j)
                 {
@@ -309,7 +313,8 @@ void NeuralNetwork::updateWeights()
                         neuronLayers[i]->coeffRef(r);
 					// cout << "derivative: " << activationFunctionDerivative(cacheLayers[i + 1]->coeffRef(c)) << " of " << cacheLayers[i + 1]->coeffRef(c) << endl;
 					// cout << "weight: " << i << " pos: " << r << ", " << c << " prev value " << weights[i]->coeffRef(r, c) << " set to " << num << endl;
-                    weights[i]->operator[]({r, c}) = num; 
+                    weights[i]->operator[]({r, c}) = (num + momentum[i]->operator[]({r, c}))/2;
+                    momentum[i]->operator[]({r, c}) = (num + momentum[i]->operator[]({r, c}))/2; 
                 } 
             } 
         } 
@@ -321,7 +326,8 @@ void NeuralNetwork::updateWeights()
 					float num = weights[i]->operator[]({r, c}) + learningRate * neuronLayers[topology.size()-2]->coeffRef(r) * activation_gradients_[c];
 					// cout << "derivative: " << activationFunctionDerivative(cacheLayers[i + 1]->coeffRef(c)) << " of " << cacheLayers[i + 1]->coeffRef(c) << endl;
 					// cout << "weight: " << i << " pos: " << r << ", " << c << " prev value " << weights[i]->operator[]({r, c}) << " set to " << num << endl;
-                    weights[i]->operator[]({r, c}) = num;
+                    weights[i]->operator[]({r, c}) = (num + momentum[i]->operator[]({r, c}))/2;
+                    momentum[i]->operator[]({r, c}) = (num + momentum[i]->operator[]({r, c}))/2; 
                 } 
             } 
         } 

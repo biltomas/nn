@@ -170,11 +170,7 @@ void Matrix<T>::setRandom() {
 
 template <typename T>
 void Matrix<T>::setZero() {
-    // std::generate(v.begin(), v.end(), (float) std::rand/RAND_MAX);
-    for (size_t i = 0; i < matrix_.size(); i++) {
-        matrix_[i] = 0;
-        // cout << v[i] << " ";
-    }
+    std::generate(matrix_.begin(), matrix_.end(), 0);
 }
 
 template <typename T>
