@@ -61,7 +61,8 @@ TEST_CASE("Matrix - binary operators") {
                                                 19, 26, 33,
                                                 29, 40, 51};
         const Matrix<float> expected_matrix(expected_data, 3);
-        const auto result = mat1 * mat2;
+        Matrix<float> result(3, 3);
+        matmul(mat1, mat2, result);
         REQUIRE(result.rows() == 3);
         REQUIRE(result.cols() == 3);
         for (int row = 0; row < 3; row++) {
@@ -71,6 +72,7 @@ TEST_CASE("Matrix - binary operators") {
         }
     }
     SECTION("Matrix multiplication - undefined multiplication") {
-        REQUIRE_THROWS_AS(mat2 * mat3, std::invalid_argument);
+        Matrix<float> result(3, 3);
+        REQUIRE_THROWS_AS(matmul(mat2, mat3, result), std::invalid_argument);
     }
 }

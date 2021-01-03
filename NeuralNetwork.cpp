@@ -5,6 +5,16 @@
 // #include "RowVector.hpp"
 // #include "RowVector.cpp"
 
+
+float crossEntropyLoss(const RowVector<float>& probabilities, const RowVector<float>& labels) {
+    float total = 0;
+    for (size_t i = 0; i < probabilities.length(); i++) {
+        total += labels.coeffRef(i) * log(probabilities.coeffRef(i)) +
+                (1 - labels.coeffRef(i)) * log(1 - probabilities.coeffRef(i));
+    }
+    return -1 * total;
+}
+
 void softMax (const RowVector<float>& input, RowVector<float>& output) {
 	// float max = 0;
 	// float sum = 0;
@@ -194,8 +204,8 @@ void NeuralNetwork::propagateForward(RowVector<float>& input)
         // already explained above 
 		// cout << "layer: " << i << endl;
 		// cout << "updating cache" << endl;
-        (*neuronLayers[i]) = (*neuronLayers[i - 1]) * (*weights[i - 1]);
-		(*cacheLayers[i]) = *neuronLayers[i];
+        matmul(*neuronLayers[i - 1], *weights[i - 1], *neuronLayers[i]);
+		matmul(*neuronLayers[i - 1], *weights[i - 1], *cacheLayers[i]);
 		// cout << "neuron " << i-1 << ": " << (*neuronLayers[i - 1]) << endl; 
 		// cout << "cache " << i << ": " << *cacheLayers[i] << endl;
 		if (i != topology.size() - 1) {
@@ -274,7 +284,8 @@ void NeuralNetwork::calcErrors(RowVector<float>& output)
     // we will begin by the last hidden layer 
     // and we will continue till the first hidden layer 
     for (uint i = topology.size() - 2; i > 0; i--) { 
-        (*deltas[i]) = (*deltas[i + 1]) * (weights[i]->transpose()); 
+        matmul(*deltas[i + 1], weights[i]->transpose(), *deltas[i]); 
+        weights[i]->transpose(); //now transpose it back
     } 
 	// printf("calcErrors end");
 } 
@@ -289,6 +300,7 @@ void NeuralNetwork::updateWeights()
         // if this layer not the output layer, there is a bias neuron and number of neurons specified = number of cols -1
 		// cout << endl << endl; 
         if (i != topology.size() - 2) { 
+            #pragma omp parallel for num_threads(8)
             for (unsigned c = 0; c < weights[i]->cols() - 1; c++) { 
                 for (uint r = 0; r < weights[i]->rows(); r++) { 
 					float num = weights[i]->operator[]({r, c}) + learningRate * 
@@ -302,8 +314,7 @@ void NeuralNetwork::updateWeights()
             } 
         } 
         else { 
-
-			// softMaxDerivative(*cacheLayers[i + 1], *cacheLayers[i + 1]);
+            #pragma omp parallel for num_threads(8)
             for (uint c = 0; c < weights[i]->cols(); c++) { 
                 for (uint r = 0; r < weights[i]->rows(); r++) { 
 					// float num = weights[i]->operator[]({r, c}) + learningRate * deltas[i + 1]->coeffRef(c) * (cacheLayers[i + 1]->coeffRef(c)) * neuronLayers[i]->coeffRef(r);
@@ -324,11 +335,14 @@ void NeuralNetwork::propagateBackward(RowVector<float>& output)
     updateWeights(); 
 } 
 
-void NeuralNetwork::train(std::vector<RowVector<float>*> input_data, std::vector<RowVector<float>> output_data, float learningRate) 
+void NeuralNetwork::train(std::vector<RowVector<float>*> input_data, std::vector<RowVector<float>>& output_data, float learningRate) 
 { 
 	// printf("train start\n");
 	this->learningRate = learningRate; 
     for (uint i = 0; i < input_data.size(); i++) { 
+        if (i % 1000 == 0) {
+            std::cout << "Checkpoint: " << i + 1 << " out of 59,000" << std::endl;
+        }
         // std::cout << "Input to neural network is : " << input_data[i] << std::endl; 
         propagateForward(*input_data[i]); 
         // std::cout << "Expected output is : "; 
@@ -366,4 +380,27 @@ void NeuralNetwork::predict(std::vector<RowVector<float>*> data, string outputFi
 		myfile << result << "\n";
     } 
 	myfile.close();
+}
+
+void NeuralNetwork::validate(std::vector<RowVector<float>*>& data, std::vector<RowVector<float>>& labels) {
+    float loss = 0;
+    float correct_predictions = 0;
+    for (size_t current = 0; current < data.size(); current++) {
+        auto& image = *data[current];
+        auto& label = labels[current];
+        propagateForward(image);
+        const std::vector<float>& probabilities = neuronLayers.back()->data().to_vector();
+        const std::vector<float>& label_vector = label.data().to_vector();
+        //compute the loss
+        loss += crossEntropyLoss(*neuronLayers.back(), label);
+        unsigned top_class = std::distance(probabilities.begin(), std::max_element(probabilities.begin(),
+                                            probabilities.end()));
+        unsigned expected_class = std::distance(label_vector.begin(), std::max_element(label_vector.begin(),
+                                            label_vector.end()));
+        if (top_class == expected_class) {
+            correct_predictions++;
+        }
+    }
+    std::cout << "Validation accuracy: " << correct_predictions / data.size() << std::endl;
+    std::cout << "Average validation loss: " << loss / data.size() << std::endl;
 }
