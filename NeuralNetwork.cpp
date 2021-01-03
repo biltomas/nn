@@ -187,7 +187,7 @@ void NeuralNetwork::propagateForward(RowVector<float>& input)
         // already explained above 
 		// cout << "layer: " << i << endl;
 		// cout << "updating cache" << endl;
-        matmul(*neuronLayers[i - 1], *weights[i - 1], *neuronLayers[i]);
+        *neuronLayers[i] = *neuronLayers[i - 1] * *weights[i - 1];
 		*cacheLayers[i] = *neuronLayers[i];
 		// cout << "neuron " << i-1 << ": " << (*neuronLayers[i - 1]) << endl; 
 		// cout << "cache " << i << ": " << *cacheLayers[i] << endl;
@@ -264,7 +264,7 @@ void NeuralNetwork::calcErrors(RowVector<float>& output)
     // we will begin by the last hidden layer 
     // and we will continue till the first hidden layer 
     for (uint i = topology.size() - 2; i > 0; i--) { 
-        matmul(*deltas[i + 1], weights[i]->transpose(), *deltas[i]); 
+        *deltas[i] = *deltas[i + 1] * weights[i]->transpose(); 
         weights[i]->transpose(); //now transpose it back
     } 
 	// printf("calcErrors end");

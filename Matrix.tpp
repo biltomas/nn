@@ -94,10 +94,11 @@ Matrix<T> operator*(const T k, Matrix<T> m1) {
 
 
 template <typename T>
-Matrix<T>& matmul(Matrix<T>& m1, Matrix<T>& m2, Matrix<T>& target) {
+Matrix<T> operator*(Matrix<T>& m1, Matrix<T>& m2) {
     if (m1.cols() != m2.rows()) {
         throw std::invalid_argument("Invalid matrix size");
     }
+    Matrix<T> target(m1.rows(), m2.cols());
 	std::pair <uint,uint> coordinates_m1;
 	std::pair <uint,uint> coordinates_m2;
     /*

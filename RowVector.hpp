@@ -50,9 +50,8 @@ public:
 };
 
 template <typename T>
-RowVector<T>& matmul(RowVector<T>& m1, Matrix<T>& m2, RowVector<T>& target) {
-    matmul(m1.data(), m2, target.data());
-    return target;
+RowVector<T> operator*(RowVector<T>& m1, Matrix<T>& m2) {
+    return RowVector<T>((m1.data() * m2).to_vector());
 }
 
 template <typename T>

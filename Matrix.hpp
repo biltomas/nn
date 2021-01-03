@@ -93,7 +93,7 @@ template <typename T>
 Matrix<T> operator*(const T k, Matrix<T> m1);
 
 template <typename T>
-Matrix<T>& matmul(Matrix<T>& m1, Matrix<T>& m2, Matrix<T>& target);
+Matrix<T> operator*(Matrix<T>& m1, Matrix<T>& m2);
 
 #include "Matrix.tpp"
 
