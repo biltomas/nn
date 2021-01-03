@@ -54,7 +54,7 @@ encode_dataset(std::vector<item<float>>& dataset) {
 
 int main() 
 { 
-    std::srand(time(NULL));
+    //std::srand(time(NULL));
     std::cout << "Loading the training dataset..." << std::endl;
     DataLoader loader("../data/fashion_mnist_train_vectors.csv", "../data/fashion_mnist_train_labels.csv");
     auto train_set = loader.load();
@@ -82,7 +82,7 @@ int main()
     // cout << "value "<< out_dat.back()->coeffRef(0) << endl;
     for (int i = 0; i < 1; i++) {
         std::cout << "Epoch " << i + 1 << " begins" << std::endl;
-        n.train(in_dat, out_dat); 
+        n.train(in_dat, out_dat, lr); 
         lr *= 0.91;
         std::cout << "Validation starts" << std::endl;
         n.validate(eval_in_dat, eval_out_dat);

@@ -48,12 +48,14 @@ TEST_CASE("Matrix - binary operators") {
     std::vector<float> data1 {1, 2,
                               3, 4,
                               5, 6};
-    std::vector<float> data2 {1, 2, 3,
-                              4, 5, 6};
+    std::vector<float> data2 {1, 4,
+                              2, 5,
+                              3, 6};
     std::vector<float> data3 {1, 2,
                               3, 4};
     Matrix<float> mat1(data1, 3);
-    Matrix<float> mat2(data2, 2);
+    Matrix<float> mat2(data2, 3);
+    mat2.transpose();
     Matrix<float> mat3(data3, 2);
 
     SECTION("Matrix multiplication - basic") {

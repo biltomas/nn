@@ -16,17 +16,6 @@ float crossEntropyLoss(const RowVector<float>& probabilities, const RowVector<fl
 }
 
 void softMax (const RowVector<float>& input, RowVector<float>& output) {
-	// float max = 0;
-	// float sum = 0;
-	// for (uint i = 0; i < input.length(); i++) {
-	// 	if (input.coeffRef(i) > max) { 
-    //         max = input.coeffRef(i);
-    //     }
-	// 	sum += input.coeffRef(i);
-	// }
-	// for(uint f = 0; f < input.length(); f++)
-  	// 	output.setValue(f, exp(input.coeffRef(f) - max)/sum);
-
 	size_t i;
 	float m, sum, constant;
 
@@ -49,16 +38,6 @@ void softMax (const RowVector<float>& input, RowVector<float>& output) {
 }
 
 void softMaxDerivative (const RowVector<float>& input, RowVector<float>& output) {
-	// float max = 0;
-	// float sum = 0;
-	// for (uint i = 0; i < input.length(); i++) {
-	// 	if (input.coeffRef(i) > max) { 
-    //         max = input.coeffRef(i);
-    //     }
-	// 	sum += input.coeffRef(i);
-	// }
-	// for(uint f = 0; f < input.length(); f++)
-  	// 	output.setValue(f, exp(input.coeffRef(f) - max)/sum);
 	vector<float> exps;
 	size_t i;
 	float sum = 0.0;
@@ -266,12 +245,9 @@ void NeuralNetwork::calcErrors(RowVector<float>& output)
 		float activation_grad = 0.0f;
 		for (size_t j = 0; j < output.length(); j++) {
 			// cout << i << j << endl;
-			if (i == j)
-                {
+			if (i == j) {
                     activation_grad += neuronLayers.back()->coeffRef(i) * (1.0f - neuronLayers.back()->coeffRef(i))* deltas.back()->coeffRef(j);
-                }
-                else
-                {
+                } else {
                     activation_grad += -neuronLayers.back()->coeffRef(i) * neuronLayers.back()->coeffRef(j) * deltas.back()->coeffRef(j);
                 }
 		}
