@@ -2,19 +2,21 @@
 
 #add the necessary modules 
 #(and ignore errors in case they are already loaded)
-module add llvm-9.0.1 2> /dev/null
+module add gcc 2> /dev/null
 module add cmake-3.6.2 2> /dev/null
 
 
 #generate the CMake config inside the build directory
-cmake -B build .
+mkdir -p build
+cd build
+cmake ..
 
 #build only the neural network without tests (to conserve time)
-make -C build pv021_nn
+make -j13 pv021_nn
 
 #run and (hopefully) profit
-cd build/
 ./pv021_nn
 
 #link the output predictions
-ln -s build/outputFile.csv ../actualPredictions
+cp outputFile.csv ../actualPredictions
+cd ..
