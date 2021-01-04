@@ -54,7 +54,7 @@ encode_dataset(std::vector<item<float>>& dataset) {
 
 int main() 
 { 
-    //std::srand(time(NULL));
+    std::srand(time(NULL));
     std::cout << "Loading the training dataset..." << std::endl;
     DataLoader loader("../data/fashion_mnist_train_vectors.csv", "../data/fashion_mnist_train_labels.csv");
     auto train_set = loader.load();
@@ -70,9 +70,9 @@ int main()
     auto& eval_out_dat = encoded_eval.second;
     std::cout << "Number of entries of the training set: " << train_set.size() << std::endl;
     std::cout << "Number of entries of the validation set: " << eval_set.size() << std::endl;
-    float lr = 0.0216;
+    float lr = 0.0532;
     // float lr = 0.03;
-    NeuralNetwork n({ 784, 1024, 10 }, lr); 
+    NeuralNetwork n({ 784, 512, 10 }, lr); 
     // std::vector<RowVector*> out_dat; 
     // std::vector<RowVector*> in_dat;
     // cout << out_dat.size() << endl;
@@ -80,10 +80,10 @@ int main()
     // cout << "rows " << out_dat.back()->vector.rows() << endl;
     // cout << "cols "<< out_dat.back()->vector.cols() << endl;
     // cout << "value "<< out_dat.back()->coeffRef(0) << endl;
-    for (int i = 0; i < 5; i++) {
+    for (int i = 0; i < 8; i++) {
         std::cout << "Epoch " << i + 1 << " begins" << std::endl;
         n.train(in_dat, out_dat, lr); 
-        lr *= 0.91;
+        lr *= 0.50;
         std::cout << "Validation starts" << std::endl;
         n.validate(eval_in_dat, eval_out_dat);
     }
