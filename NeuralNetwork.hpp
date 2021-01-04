@@ -5,6 +5,7 @@
 #include <vector> 
 #include <memory>
 #include <math.h>
+#include <fstream>
 
 // use typedefs for future ease for changing data types like : float to double 
 // typedef Matrix Matrix; 
@@ -33,7 +34,11 @@ public:
 	void updateWeights(); 
 
 	// function to train the neural network give an array of data points 
-	void train(std::vector<RowVector<float>*> data, std::vector<RowVector<float>*> output_data); 
+	void train(std::vector<RowVector<float>*> data, std::vector<RowVector<float>>& output_data, float learningRate = float(0.005)); 
+
+	void predict(std::vector<RowVector<float>*> data, string outputFile = "./outputFile.csv");
+
+    void validate(std::vector<RowVector<float>*>& data, std::vector<RowVector<float>>& labels);
 
 	// storage objects for working of neural network 
 	/* 
@@ -47,5 +52,7 @@ public:
 	std::vector<unique_ptr<RowVector<float>>> deltas; // stores the error contribution of each neurons 
 	std::vector<unique_ptr<Matrix<float>>> weights; // the connection weights itself 
 	std::vector<size_t> topology;
+	std::vector<float> activation_gradients_;
+    std::vector<unique_ptr<Matrix<float>>> momentum;
 	float learningRate; 
 }; 

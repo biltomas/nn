@@ -92,87 +92,93 @@ Matrix<T> operator*(const T k, Matrix<T> m1) {
 	return m1;
 }
 
+
 template <typename T>
-Matrix<T> operator*(const Matrix<T> m1, const Matrix<T>& m2) {
-	Matrix<T> result(m1.rows(), m2.cols());
-	std::pair <uint,uint> coordinates_target;
+Matrix<T> operator*(Matrix<T>& m1, Matrix<T>& m2) {
+    if (m1.cols() != m2.rows()) {
+        throw std::invalid_argument("Invalid matrix size");
+    }
+    Matrix<T> target(m1.rows(), m2.cols());
 	std::pair <uint,uint> coordinates_m1;
 	std::pair <uint,uint> coordinates_m2;
-	// cout << "multiply" << endl;
-	// cout << "m1:" << endl;
-	// for (uint row = 0; row < m1.rows(); row++) {
-	// 	for (uint col = 0; col < m1.cols(); col++) {
-	// 		cout << m1[make_pair(row, col)] << " ";
-	// 	}
-	// 	cout << endl;
-	// }
-	// cout << "m2:" << endl;
-	// for (uint row = 0; row < m2.rows(); row++) {
-	// 	for (uint col = 0; col < m2.cols(); col++) {
-	// 		cout << m2[make_pair(row, col)] << " ";
-	// 	}
-	// 	cout << endl;
-	// }
-	// cout << "m1 size: " << m1.size().first << ", " << m1.size().second << endl;
-	// cout << "m2 size: " << m2.size().first << ", " << m2.size().second << endl;
-	for (uint x = 0; x < m2.cols(); x++) {
-		for (uint y = 0; y < m1.rows(); y++) {
-			coordinates_target = std::make_pair(y,x); 
-			result[coordinates_target] = 0;
-			// cout << y << ", " << x << endl;
-			for (uint xx = 0; xx < m1.cols(); xx++){
-				coordinates_m1 = std::make_pair(y, xx); 
-				coordinates_m2 = std::make_pair(xx, x); 
-				// cout << "m1: " << coordinates_m1.first << ", " << coordinates_m1.second << endl;
-				// cout << "m2: " << coordinates_m2.first << ", " << coordinates_m2.second << endl;
-				result[coordinates_target] += m1[coordinates_m1] * m2[coordinates_m2];
+    /*
+    const unsigned BLOCK_SIZE = 8;
+	for (uint target_y = 0; target_y < m1.rows(); target_y++) {
+	    for (uint target_x = 0; target_x < m2.cols(); target_x += BLOCK_SIZE) {
+			for (uint shared_axis = 0; shared_axis < m1.cols(); shared_axis++){
+				coordinates_m1 = std::make_pair(target_y, shared_axis); 
+                for (unsigned block = target_x; block < target_x + BLOCK_SIZE && block < m2.cols(); block++) {
+				    coordinates_m2 = std::make_pair(shared_axis, block); 
+				    target[{target_y, block}] += m1[coordinates_m1] * m2[coordinates_m2];
+                }
+			}
+		}
+	}*/
+    #pragma omp parallel for shared(m1, m2, target) num_threads(8) 
+	for (uint target_x = 0; target_x < m2.cols(); target_x++) {
+	    for (uint target_y = 0; target_y < m1.rows(); target_y++) {
+			for (uint shared_axis = 0; shared_axis < m1.cols(); shared_axis++) {
+                target[{target_y, target_x}] += m1[{target_y, shared_axis}] * m2[{shared_axis, target_x}];
 			}
 		}
 	}
-	// cout << "result:" << endl;
-	// for (uint row = 0; row < result.rows(); row++) {
-	// 	for (uint col = 0; col < result.cols(); col++) {
-	// 		cout << result[make_pair(row, col)] << " ";
-	// 	}
-	// 	cout << endl;
-	// }
-	return result;
+	return target;
 }
+
 
 template <typename T>
 T& Matrix<T>::operator[](std::pair<size_t, size_t> index){
 	if (index.first >= rows() || index.second >= cols()) {
 		throw std::out_of_range("Index out of range");
 	}
+    if (transposed) {
+        return matrix_[index.second * rows() + index.first];
+    }
 	return matrix_[index.first * cols() + index.second];
 }
 
 template <typename T>
 const T& Matrix<T>::operator[](std::pair<size_t, size_t> index) const {
+    if (transposed) {
+        return matrix_[index.second * rows() + index.first];
+    }
 	return matrix_[index.first * cols() + index.second];
 }
 
 template <typename T>
-Matrix<T> Matrix<T>::transpose() {
+Matrix<T>& Matrix<T>::transpose() {
+    /*
 	Matrix<T> newMatrix(cols_, rows_);
 	for (unsigned col = 0; col < cols_; col++) {
 		for (unsigned row = 0; row < rows_; row++) {
 			newMatrix[{col, row}] = operator[]({row, col});
 		}
 	}
-	return newMatrix;
-	
+    */
+    transposed = !transposed;
+    std::swap(rows_, cols_);
+    return *this;
 };
 
 template <typename T>
 void Matrix<T>::setRandom() {
-    std::pair<size_t, size_t> Matrix_size = size();
-
-    std::vector<T> v(Matrix_size.first * Matrix_size.second);
     // std::generate(v.begin(), v.end(), (float) std::rand/RAND_MAX);
-    for (size_t i = 0; i < v.size(); i++) {
-        v[i] = static_cast<T>(std::rand()) / static_cast<T>(RAND_MAX);
-        // cout << v[i] << " ";
+    for (size_t i = 0; i < matrix_.size(); i++) {
+        matrix_[i] = (static_cast<T>(std::rand()) / (static_cast<T>(RAND_MAX)))/100;
+        // std::cout << matrix_[i] << " ";
     }
-    *this = Matrix(v, Matrix_size.first);
+}
+
+template <typename T>
+void Matrix<T>::setZero() {
+    std::generate(matrix_.begin(), matrix_.end(), 0);
+}
+
+template <typename T>
+void Matrix<T>::setNumber(float number) {
+    // std::generate(v.begin(), v.end(), (float) std::rand/RAND_MAX);
+    for (size_t i = 0; i < matrix_.size(); i++) {
+        matrix_[i] = number + ((static_cast<T>(std::rand()) / (static_cast<T>(RAND_MAX)))/100);
+        // std::cout << matrix_[i] << " ";
+    }
 }

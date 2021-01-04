@@ -13,6 +13,7 @@ private:
 	std::vector<T> matrix_;
 	std::size_t rows_; // number of rows
 	std::size_t cols_; // number of columns
+    bool transposed;
 
 public:
 	Matrix() {
@@ -22,14 +23,16 @@ public:
 	Matrix(size_t rows, std::size_t cols)
 	    : matrix_(rows * cols)
 	    , rows_(rows)
-	    , cols_(cols) {}
+	    , cols_(cols)
+        , transposed(false) {}
 
 	Matrix(const std::vector<T> &data, std::size_t rows)
 	    : matrix_(data.size() % rows == 0
 	              ? data
 	              : throw std::invalid_argument("Input data has incompatible size"))
 	    , rows_(rows)
-	    , cols_(data.size() / rows) {}
+	    , cols_(data.size() / rows)
+        , transposed(false) {}
 
 	// Returns number of rows, number of columns
 	std::pair<size_t, size_t> size() const {
@@ -41,7 +44,7 @@ public:
 
 	// Returns number of columns
 	size_t cols() const { return cols_; }
-	std::vector<T> to_vector() const { return matrix_; }
+	std::vector<T>& to_vector() { return matrix_; }
 
 	/******* TODO - Operators *******/
 	// operator[] takes a pair { row index, column index } where
@@ -55,6 +58,8 @@ public:
     
 
     void setRandom();
+	void setZero();
+	void setNumber(float number);
 
 	
 	Matrix<T>& operator+=(const Matrix<T>& m2);
@@ -64,11 +69,12 @@ public:
 	Matrix<T>& operator*=(T k);
 
 
-	Matrix<T> transpose();
+	Matrix<T>& transpose();
 
 	T& operator[](std::pair<size_t, size_t> index);
 	
 	const T& operator[](std::pair<size_t, size_t> index) const;
+
 };
 
 template <typename T>
@@ -87,7 +93,7 @@ template <typename T>
 Matrix<T> operator*(const T k, Matrix<T> m1);
 
 template <typename T>
-Matrix<T> operator*(Matrix<T> m1, const Matrix<T>& m2);
+Matrix<T> operator*(Matrix<T>& m1, Matrix<T>& m2);
 
 #include "Matrix.tpp"
 

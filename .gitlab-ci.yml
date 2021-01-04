@@ -1,0 +1,27 @@
+image: amardikian/clang-3.8
+
+stages:
+- build
+- test
+
+build:
+    stage: build
+    tags:
+        - shared-fi
+    variables:
+        CC: clang
+        CXX: clang++
+    script:
+        - cmake .
+        - make
+    artifacts:
+        untracked: true
+
+test:
+    stage: test
+    tags:
+        - shared-fi
+    script:
+        - ./pv021_tests
+    dependencies:
+        - build

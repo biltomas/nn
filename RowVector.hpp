@@ -15,7 +15,7 @@ public:
 
     RowVector(uint size) {
         std::vector<T> vector (size, T());
-        vector_ = Matrix(vector, 1);
+        vector_ = Matrix<T>(vector, 1);
     }
 
 	void setValue(const uint pos, const float value) {
@@ -24,12 +24,7 @@ public:
 
     float coeffRef(const uint pos) const {
         if (pos >= length()) {
-            std::cerr << "Index out of range at "
-            << length()
-            << " with size of "
-            << pos
-            << std::endl;
-            throw std::out_of_range("Aborted");
+            throw std::out_of_range("Index out of range");
         }
         return vector_[{0, pos}];
     }
@@ -44,19 +39,35 @@ public:
 
     unsigned length() const { return vector_.size().second; }
 
-    const Matrix<T>& data() const {
+    RowVector<T>& operator-=(const RowVector<T>& m1) {
+        data() -= m1.data();
+        return *this;
+    }
+
+    Matrix<T>& data() {
         return vector_;
     }
 };
 
 template <typename T>
-RowVector<T> operator*(RowVector<T>& m1, const Matrix<T>& m2) {
+RowVector<T> operator*(RowVector<T>& m1, Matrix<T>& m2) {
+    return RowVector<T>((m1.data() * m2).to_vector());
+}
+
+template <typename T>
+RowVector<T> operator*(RowVector<T>& m1, const RowVector<T>& m2) {
     return RowVector<T>((m1.data() * m2).to_vector());
 }
 
 
 template <typename T>
-RowVector<T> operator-(RowVector<T>& m1, const RowVector<T>& m2) {
+RowVector<T> operator-(RowVector<T>& m1, RowVector<T>& m2) {
 	//return RowVector((m1.vector - m2.vector).to_vector());
     return RowVector<T>((m1.data() - m2.data()).to_vector());
+}
+
+template <typename T>
+std::ostream &operator<<(std::ostream& out, const RowVector<T> &mt) {
+    out << mt.data();
+    return out;
 }

@@ -56,3 +56,8 @@ CMakeLists.txt.user*
 # QtCreator local machine specific files for imported projects
 *creator.user*
 
+#continuos integration via gitlab ci
+.gitlab-ci.yml
+
+#unignore RUN file
+RUN
