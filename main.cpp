@@ -3,26 +3,7 @@
 
 
 typedef std::vector<RowVector<float>*> data;
-
-// void genData() 
-// { 
-//     for (uint r = 0; r < 1000; r++) { 
-//         float x = rand() / float(RAND_MAX); 
-//         float y = rand() / float(RAND_MAX); 
-//         float z = 2 * x + 10 + y; 
-//         std::vector<float> out;
-//         std::vector<float> in;
-//         out.push_back(z);
-//         in.push_back(x);
-//         in.push_back(y);
-//         RowVector out_row = RowVector(out);
-//         RowVector in_row = RowVector(in);
-//         out_dat.push_back(&out_row);
-//         cout << out_dat.size() << endl;
-        
-//         in_dat.push_back(&in_row);
-//     }  
-// } 
+ 
 std::vector<float> oneHotEncode(int out_dat, int num_classes) {
     vector<float> encoded;
     for (int i = 0; i < num_classes; i++) {
@@ -70,19 +51,15 @@ int main()
     auto& eval_out_dat = encoded_eval.second;
     std::cout << "Number of entries of the training set: " << train_set.size() << std::endl;
     std::cout << "Number of entries of the validation set: " << eval_set.size() << std::endl;
+    // learning rate
     float lr = 0.0532;
-    // float lr = 0.03;
+    // neural network architecture
     NeuralNetwork n({ 784, 512, 10 }, lr); 
-    // std::vector<RowVector*> out_dat; 
-    // std::vector<RowVector*> in_dat;
-    // cout << out_dat.size() << endl;
-    // cout << out_dat.back()->coeffRef(0) << endl;
-    // cout << "rows " << out_dat.back()->vector.rows() << endl;
-    // cout << "cols "<< out_dat.back()->vector.cols() << endl;
-    // cout << "value "<< out_dat.back()->coeffRef(0) << endl;
+    
     for (int i = 0; i < 8; i++) {
         std::cout << "Epoch " << i + 1 << " begins" << std::endl;
         n.train(in_dat, out_dat, lr); 
+        // learning rate drop
         lr *= 0.50;
         std::cout << "Validation starts" << std::endl;
         n.validate(eval_in_dat, eval_out_dat);

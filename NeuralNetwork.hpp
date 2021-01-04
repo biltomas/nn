@@ -7,15 +7,9 @@
 #include <math.h>
 #include <fstream>
 
-// use typedefs for future ease for changing data types like : float to double 
-// typedef Matrix Matrix; 
-// typedef RowVector RowVector; 
-// typedef ColVector ColVector; 
-
 using std::unique_ptr;
 using std::make_unique;
 
-// neural network implementation class! 
 class NeuralNetwork { 
 public: 
 	// constructor 
@@ -36,23 +30,25 @@ public:
 	// function to train the neural network give an array of data points 
 	void train(std::vector<RowVector<float>*> data, std::vector<RowVector<float>>& output_data, float learningRate = float(0.005)); 
 
+	// function to predict output given input and output into file
 	void predict(std::vector<RowVector<float>*> data, string outputFile = "./outputFile.csv");
 
+	// function of validation
     void validate(std::vector<RowVector<float>*>& data, std::vector<RowVector<float>>& labels);
 
-	// storage objects for working of neural network 
-	/* 
-		use pointers when using std::vector<Class> as std::vector<Class> calls destructor of 
-		Class as soon as it is pushed back! when we use pointers it can't do that, besides 
-		it also makes our neural network class less heavy!! It would be nice if you can use 
-		smart pointers instead of usual ones like this 
-		*/
-	std::vector<unique_ptr<RowVector<float>>> neuronLayers; // stores the different layers of out network 
-	std::vector<unique_ptr<RowVector<float>>> cacheLayers; // stores the unactivated (activation fn not yet applied) values of layers 
-	std::vector<unique_ptr<RowVector<float>>> deltas; // stores the error contribution of each neurons 
-	std::vector<unique_ptr<Matrix<float>>> weights; // the connection weights itself 
+	// stores value of every neuron
+	std::vector<unique_ptr<RowVector<float>>> neuronLayers;
+	// stores inner potentials of neurons
+	std::vector<unique_ptr<RowVector<float>>> cacheLayers;
+	// stores errors for every neuron
+	std::vector<unique_ptr<RowVector<float>>> deltas;
+	// input weights of neurons
+	std::vector<unique_ptr<Matrix<float>>> weights; 
+	// stores number of neurons in every layer
 	std::vector<size_t> topology;
+	// activation gradients for crossentropy backpropagation
 	std::vector<float> activation_gradients_;
+	// stores momentum of neuron gradients
     std::vector<unique_ptr<Matrix<float>>> momentum;
 	float learningRate; 
 }; 
