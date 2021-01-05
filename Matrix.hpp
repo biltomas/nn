@@ -57,8 +57,13 @@ public:
 	bool operator!=(const Matrix<T>& m1) const;
     
 
+    //Random initialization of the entire matrix
     void setRandom();
+
+    //zero-initialization of the entire matrix
 	void setZero();
+
+    //randomly initializes the matrix with offset of "number"
 	void setNumber(float number);
 
 	
@@ -69,6 +74,9 @@ public:
 	Matrix<T>& operator*=(T k);
 
 
+    //transposes the matrix
+    //the memory itself remains unchanged to avoid unnecessary
+    //operations
 	Matrix<T>& transpose();
 
 	T& operator[](std::pair<size_t, size_t> index);
@@ -86,12 +94,14 @@ Matrix<T> operator+(Matrix<T> m1, const Matrix<T>& m2);
 template <typename T, typename U>
 Matrix<T> operator-(Matrix<T> m1, const Matrix<T>& m2);
 
+//multiplication of matrix with a constant
 template <typename T>
 Matrix<T> operator*(Matrix<T> m1, const T k);
 
 template <typename T>
 Matrix<T> operator*(const T k, Matrix<T> m1);
 
+//multiplication of two matrices
 template <typename T>
 Matrix<T> operator*(Matrix<T>& m1, Matrix<T>& m2);
 

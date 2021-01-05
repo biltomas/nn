@@ -158,7 +158,7 @@ Matrix<T>& Matrix<T>::transpose() {
     transposed = !transposed;
     std::swap(rows_, cols_);
     return *this;
-};
+}
 
 template <typename T>
 void Matrix<T>::setRandom() {

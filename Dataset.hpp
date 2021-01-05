@@ -13,6 +13,10 @@ struct item {
     int label;
 };
 
+/**
+ * A class responsible for loading and checking the correctness
+ * of the .csv dataset
+ */
 class DataLoader {
     const std::string vec_path;
     const std::string label_path;
@@ -54,7 +58,6 @@ class DataLoader {
         char label_buffer[3];
         vec_file.getline(vec_buffer, 4096);
         std::string raw_vec(vec_buffer);
-        //std::cout << "Raw vec: " << raw_vec << std::endl;
         label_file.getline(label_buffer, 3);
         std::string raw_label(label_buffer);
         if (vec_file.fail()) {
@@ -81,14 +84,17 @@ public:
         , label_path(label_path) {};
 
 
+    //Opens the .csv file specified inside the class constructor,
+    //and loads the entire content
+    //likes to complain a lot in case the .csv is incorrect
     std::vector<item<float>> load() const {
         std::ifstream vec_file(vec_path);
         if (vec_file.fail() || !vec_file.is_open()) {
-            throw std::invalid_argument("Vec file error");
+            throw std::invalid_argument("Invalid path to vec file");
         }
         std::ifstream label_file(label_path);
         if (label_file.fail() || !label_file.is_open()) {
-            throw std::invalid_argument("Label file error");
+            throw std::invalid_argument("Invalid path to label file");
         }
         std::vector<item<float>> data;
         while (!vec_file.eof() && !label_file.eof()) {
@@ -104,6 +110,8 @@ public:
         return data;
     }
 
+    //internally splits the dataset into a validation set of size "size
+    //Validation set is balanced w.r.t amount of samples for each class
     std::vector<item<float>> split_into_validation(std::vector<item<float>>& dataset, const unsigned size = 1000) {
         const unsigned class_size = size / 10;
         std::array<unsigned, 10> counter;

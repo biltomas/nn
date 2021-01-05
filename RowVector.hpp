@@ -6,6 +6,9 @@
 #include <string>
 using namespace std; 
 
+/**
+ * A wrapper around the Matrix class that represents 1D vector
+ */
 template <typename T = float>
 class RowVector { 
     Matrix<T> vector_;
